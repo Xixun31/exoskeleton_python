@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AS5145 編碼器讀取流程 - 橫式簡報</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 全局設定 (亮色主題) */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        /* 投影片容器 (16:9 比例) */
+        .slide {
+            width: 1280px;
+            height: 720px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            position: relative;
+            padding: 60px 80px;
+            color: #333333;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 標題與內文 */
+        .slide h1 { font-size: 64px; margin-bottom: 20px; color: #0056b3; letter-spacing: 2px; }
+        .slide h2 { font-size: 48px; border-bottom: 3px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 40px; color: #222222; }
+        .slide p { font-size: 28px; line-height: 1.6; color: #555555; }
+        
+        .accent { color: #d35400; }
+        .cyan { color: #0056b3; }
+
+        /* 內容區塊排版 */
+        .content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
+        .row { display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; gap: 40px; }
+        .col { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+        /* ======== 方塊圖與圖表 CSS 組件 ======== */
+        
+        /* 基本方塊 */
+        .box {
+            background: #ffffff;
+            border: 2px solid #0056b3;
+            border-radius: 12px;
+            padding: 30px 40px;
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 86, 179, 0.1);
+            z-index: 2;
+            color: #333333;
+        }
+        .box.orange { border-color: #d35400; box-shadow: 0 4px 15px rgba(211, 84, 0, 0.1); }
+        .box.dark { background: #f8f9fa; border-color: #cccccc; box-shadow: none; color: #666666; }
+        
+        /* 箭頭 */
+        .arrow-down { font-size: 40px; color: #888888; margin: 10px 0; }
+        .arrow-right { font-size: 40px; color: #888888; margin: 0 20px; }
+        
+        /* 系統架構連線 */
+        .sys-lines { display: flex; flex-direction: column; gap: 20px; flex: 1; position: relative; }
+        .sys-line { 
+            display: flex; justify-content: center; align-items: center; 
+            height: 40px; background: rgba(0,0,0,0.02); 
+            border-top: 2px dashed #bbbbbb; position: relative;
+            font-size: 24px; color: #666666; font-family: monospace;
+        }
+        .sys-line span { background: #ffffff; padding: 0 15px; position: absolute; top: -18px; }
+        
+        /* 流程圖外框 (While Loop) */
+        .loop-container {
+            border: 3px dashed #d35400;
+            border-radius: 16px;
+            padding: 40px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(211, 84, 0, 0.03);
+            width: 60%;
+        }
+        .loop-label {
+            position: absolute; top: -25px; left: 40px;
+            background: #ffffff; padding: 0 20px;
+            font-size: 28px; color: #d35400; font-weight: bold;
+        }
+
+        /* 水平流程 (SPI Read) */
+        .h-flow { display: flex; flex-direction: row; align-items: center; width: 100%; justify-content: center; }
+        .h-flow .box { font-size: 24px; padding: 20px; }
+
+        /* 位元解析方塊圖 (Bitwise Diagram) */
+        .bit-container { display: flex; gap: 4px; margin-bottom: 20px; }
+        .bit {
+            width: 55px; height: 60px;
+            background: #ffffff; border: 1px solid #cccccc;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-family: monospace; font-size: 20px; border-radius: 4px;
+            color: #333333;
+        }
+        .bit.valid { background: #e3f2fd; border-color: #2196f3; color: #0d47a1; }
+        .bit.discard { background: #ffebee; border-color: #f44336; color: #b71c1c; }
+        .bit.dark { background: #f0f0f0; border-color: #cccccc; color: #888888; }
+        .bit-label { font-size: 14px; color: #888888; margin-bottom: 5px; }
+        .bit-val { font-weight: bold; }
+
+        /* 數學公式框 */
+        .math-box {
+            background: #f8f9fa; border-left: 8px solid #0056b3;
+            padding: 40px; font-size: 40px; font-family: 'Courier New', Courier, monospace;
+            border-radius: 8px; margin-top: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* 投影片頁碼 */
+        .page-num { position: absolute; bottom: 30px; right: 40px; font-size: 20px; color: #999999; }
+    </style>
+</head>
+<body>
+
+    <!-- 投影片 1：標題頁 -->
+    <div class="slide">
+        <div class="content" style="text-align: center;">
+            <i class="fas fa-microchip" style="font-size: 120px; color: #0056b3; margin-bottom: 40px;"></i>
+            <h1>AS5145 編碼器讀取流程</h1>
+            <p style="font-size: 36px; color: #666666;">SPI 通訊協定與 C++ 程式邏輯解析</p>
+        </div>
+        <div class="page-num">1 / 6</div>
+    </div>
+
+    <!-- 投影片 2：硬體連接方塊圖 -->
+    <div class="slide">
+        <h2>硬體架構與腳位連接</h2>
+        <div class="content">
+            <div class="row" style="padding: 0 40px;">
+                <div class="box" style="height: 350px; display: flex; align-items: center; width: 250px;">
+                    MCU (Master)
+                </div>
+                
+                <div class="sys-lines">
+                    <div class="sys-line"><span>MOSI (D4) ➔</span></div>
+                    <div class="sys-line"><span>⬅ MISO (D5)</span></div>
+                    <div class="sys-line"><span>SCLK (D3) ➔</span></div>
+                    <div class="sys-line" style="border-top: 2px dashed #d35400;">
+                        <span style="color: #d35400;">CS (D9) ➔</span>
+                    </div>
+                </div>
+
+                <div class="box orange" style="height: 350px; display: flex; flex-direction: column; justify-content: center; width: 250px;">
+                    <div>AS5145</div>
+                    <div style="font-size: 20px; margin-top: 15px; color: #777777;">(12-bit Encoder)</div>
+                </div>
+            </div>
+        </div>
+        <div class="page-num">2 / 6</div>
+    </div>
+
+    <!-- 投影片 3：主程式流程圖 -->
+    <div class="slide">
+        <h2>主程式迴圈 (Main Loop)</h2>
+        <div class="content">
+            <div class="row" style="align-items: center; justify-content: center; gap: 60px; width: 90%;">
+                <!-- 左側：系統啟動與初始化 -->
+                <div class="col" style="flex: 1;">
+                    <div class="box dark" style="padding: 15px 40px; width: 100%;">系統啟動 (Start)</div>
+                    <i class="fas fa-arrow-down arrow-down"></i>
+                    <div class="box" style="padding: 20px 30px; width: 100%;">初始化 IO 與 SPI<br><span style="font-size: 18px; color: #666666;">(設定 CS=1, 1MHz, 16-bit)</span></div>
+                </div>
+                
+                <!-- 中間：進入迴圈指標 -->
+                <i class="fas fa-arrow-right arrow-right" style="font-size: 50px; color: #d35400;"></i>
+                
+                <!-- 右側：While 迴圈 -->
+                <div class="loop-container" style="flex: 1.5; width: auto; padding: 40px 60px;">
+                    <div class="loop-label">While (true) 迴圈</div>
+                    <div class="box dark" style="padding: 15px 30px; width: 100%;">延遲 50ms</div>
+                    <i class="fas fa-arrow-down arrow-down"></i>
+                    <div class="box orange" style="padding: 15px 30px; width: 100%;">讀取位置 (read_position)</div>
+                    <i class="fas fa-arrow-down arrow-down"></i>
+                    <div class="box dark" style="padding: 15px 30px; width: 100%;">印出角度 (print_angle)</div>
+                </div>
+            </div>
+        </div>
+        <div class="page-num">3 / 6</div>
+    </div>
+
+    <!-- 投影片 4：SPI 讀取時序方塊圖 -->
+    <div class="slide">
+        <h2>SPI 通訊讀取步驟</h2>
+        <div class="content">
+            <p style="margin-bottom: 40px;">針對 <span class="cyan">read_position()</span> 函式內部的硬體操作</p>
+            <div class="h-flow">
+                <div class="box orange">
+                    <i class="fas fa-level-down-alt" style="margin-bottom: 10px;"></i><br>
+                    CS 拉低 (0)<br>
+                    <span style="font-size: 16px; color:#777777">啟動通訊</span>
+                </div>
+                <i class="fas fa-arrow-right arrow-right"></i>
+                <div class="box dark">
+                    <i class="fas fa-stopwatch" style="margin-bottom: 10px;"></i><br>
+                    Wait 10us<br>
+                    <span style="font-size: 16px; color:#777777">給予反應時間</span>
+                </div>
+                <i class="fas fa-arrow-right arrow-right"></i>
+                <div class="box cyan">
+                    <i class="fas fa-exchange-alt" style="margin-bottom: 10px;"></i><br>
+                    寫入 0x0000<br>讀取 16-bit<br>
+                    <span style="font-size: 16px; color:#777777">取得 raw_data</span>
+                </div>
+                <i class="fas fa-arrow-right arrow-right"></i>
+                <div class="box orange">
+                    <i class="fas fa-level-up-alt" style="margin-bottom: 10px;"></i><br>
+                    CS 拉高 (1)<br>
+                    <span style="font-size: 16px; color:#777777">結束通訊</span>
+                </div>
+            </div>
+        </div>
+        <div class="page-num">4 / 6</div>
+    </div>
+
+    <!-- 投影片 5：位元解析方塊圖 -->
+    <div class="slide">
+        <h2>資料解析 (Data Parsing)</h2>
+        <div class="content">
+            <p style="align-self: flex-start; margin-bottom: 20px;">步驟 1: 原始 16-bit 資料 (<span class="cyan">raw_data</span>)</p>
+            <div class="bit-container">
+                <div class="bit discard"><span class="bit-label">15</span><span class="bit-val">X</span></div>
+                <!-- Valid 12 bits -->
+                <div class="bit valid"><span class="bit-label">14</span><span class="bit-val">D11</span></div>
+                <div class="bit valid"><span class="bit-label">13</span><span class="bit-val">D10</span></div>
+                <div class="bit valid"><span class="bit-label">12</span><span class="bit-val">D9</span></div>
+                <div class="bit valid"><span class="bit-label">11</span><span class="bit-val">D8</span></div>
+                <div class="bit valid"><span class="bit-label">10</span><span class="bit-val">D7</span></div>
+                <div class="bit valid"><span class="bit-label">9</span><span class="bit-val">D6</span></div>
+                <div class="bit valid"><span class="bit-label">8</span><span class="bit-val">D5</span></div>
+                <div class="bit valid"><span class="bit-label">7</span><span class="bit-val">D4</span></div>
+                <div class="bit valid"><span class="bit-label">6</span><span class="bit-val">D3</span></div>
+                <div class="bit valid"><span class="bit-label">5</span><span class="bit-val">D2</span></div>
+                <div class="bit valid"><span class="bit-label">4</span><span class="bit-val">D1</span></div>
+                <div class="bit valid"><span class="bit-label">3</span><span class="bit-val">D0</span></div>
+                <!-- Discarded bottom bits -->
+                <div class="bit discard"><span class="bit-label">2</span><span class="bit-val">X</span></div>
+                <div class="bit discard"><span class="bit-label">1</span><span class="bit-val">X</span></div>
+                <div class="bit discard"><span class="bit-label">0</span><span class="bit-val">X</span></div>
+            </div>
+
+            <i class="fas fa-arrow-down arrow-down" style="margin: 5px 0;"></i>
+
+            <p style="align-self: flex-start; margin-bottom: 20px;">步驟 2: 右移 3 位並 Mask 0x0FFF (<span class="accent">>> 3 & 0x0FFF</span>)</p>
+            <div class="bit-container">
+                <!-- Padding zeroes from shift -->
+                <div class="bit dark"><span class="bit-label">15</span><span class="bit-val">0</span></div>
+                <div class="bit dark"><span class="bit-label">14</span><span class="bit-val">0</span></div>
+                <div class="bit dark"><span class="bit-label">13</span><span class="bit-val">0</span></div>
+                <div class="bit dark"><span class="bit-label">12</span><span class="bit-val">0</span></div>
+                <!-- Shifted valid bits -->
+                <div class="bit valid"><span class="bit-label">11</span><span class="bit-val">D11</span></div>
+                <div class="bit valid"><span class="bit-label">10</span><span class="bit-val">D10</span></div>
+                <div class="bit valid"><span class="bit-label">9</span><span class="bit-val">D9</span></div>
+                <div class="bit valid"><span class="bit-label">8</span><span class="bit-val">D8</span></div>
+                <div class="bit valid"><span class="bit-label">7</span><span class="bit-val">D7</span></div>
+                <div class="bit valid"><span class="bit-label">6</span><span class="bit-val">D6</span></div>
+                <div class="bit valid"><span class="bit-label">5</span><span class="bit-val">D5</span></div>
+                <div class="bit valid"><span class="bit-label">4</span><span class="bit-val">D4</span></div>
+                <div class="bit valid"><span class="bit-label">3</span><span class="bit-val">D3</span></div>
+                <div class="bit valid"><span class="bit-label">2</span><span class="bit-val">D2</span></div>
+                <div class="bit valid"><span class="bit-label">1</span><span class="bit-val">D1</span></div>
+                <div class="bit valid"><span class="bit-label">0</span><span class="bit-val">D0</span></div>
+            </div>
+            
+        </div>
+        <div class="page-num">5 / 6</div>
+    </div>
+
+    <!-- 投影片 6：角度換算 -->
+    <div class="slide">
+        <h2>物理角度換算</h2>
+        <div class="content">
+            <p>將 12-bit (0 ~ 4095) 的乾淨數據，轉換為 0 ~ 360 度的實際物理角度。</p>
+            
+            <div class="math-box">
+                <span class="cyan">degree</span> = (<span class="accent">valid_data</span> / <span class="cyan">4096.0f</span>) * 360.0f;
+            </div>
+
+            <div class="row" style="margin-top: 60px; justify-content: center; gap: 80px;">
+                <div class="col">
+                    <span style="font-size: 64px; font-weight: bold; color: #0056b3;">12-bit</span>
+                    <span style="font-size: 24px; color: #666666;">硬體解析度</span>
+                </div>
+                <div style="width: 2px; height: 80px; background: #dddddd;"></div>
+                <div class="col">
+                    <span style="font-size: 64px; font-weight: bold; color: #d35400;">0.0879°</span>
+                    <span style="font-size: 24px; color: #666666;">每單位步進角度</span>
+                </div>
+            </div>
+        </div>
+        <div class="page-num">6 / 6</div>
+    </div>
+
+</body>
+</html>
