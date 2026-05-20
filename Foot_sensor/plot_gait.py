@@ -71,13 +71,14 @@ plt.grid(True, linestyle='--', alpha=0.6)
 plt.legend(loc='upper right')
 
 # --- Figure 2: Left Foot Micro-Gait Timing (Heel vs. Forefoot) ---
-plt.figure('Heel vs Toe Timing Analysis', figsize=(10, 5))
+plt.figure('Heel vs Forefoot Timing Analysis', figsize=(10, 5)) # 🛠️ 圖表視窗名稱微調
 if left_data["time"]:
-    # Plotting using the updated hardware coordinates while preserving the original english text
+    # 🛠️ 將標籤從原先的 'Left Toe (Propulsion)' 改為學術名詞 'Left Forefoot (Propulsion)'
     plt.plot(left_data["time"], left_data["heel"], color='navy', linestyle='-', linewidth=2, label='Left Heel (Contact)')
-    plt.plot(left_data["time"], left_data["forefoot"], color='darkorange', linestyle='--', linewidth=2, label='Left Toe (Propulsion)')
+    plt.plot(left_data["time"], left_data["forefoot"], color='darkorange', linestyle='--', linewidth=2, label='Left Forefoot (Propulsion)')
 
-plt.title('Heel Strike vs. Toe Off Timing Verification', fontsize=12, fontweight='bold', pad=15)
+# 🛠️ 標題修改：將 "Toe Off" 修正為更能代表前腳掌特徵的 "Forefoot Loading" 或 "Forefoot Push-Off"
+plt.title('Heel Strike vs. Forefoot Loading Timing Verification', fontsize=12, fontweight='bold', pad=15)
 plt.xlabel('Time (Seconds s)', fontsize=10, labelpad=8)
 plt.ylabel('Sensor Raw Value (g)', fontsize=10, labelpad=8)
 plt.grid(True, linestyle='--', alpha=0.6)
