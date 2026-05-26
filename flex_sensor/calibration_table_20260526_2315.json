@@ -1,0 +1,97 @@
+[
+    {
+        "angle_degree": 0,
+        "avg_voltage_v": 1.303,
+        "avg_resistance_ohms": 15326.48
+    },
+    {
+        "angle_degree": 5,
+        "avg_voltage_v": 0.933,
+        "avg_resistance_ohms": 25431.98
+    },
+    {
+        "angle_degree": 10,
+        "avg_voltage_v": 1.263,
+        "avg_resistance_ohms": 16130.56
+    },
+    {
+        "angle_degree": 15,
+        "avg_voltage_v": 0.955,
+        "avg_resistance_ohms": 24786.3
+    },
+    {
+        "angle_degree": 20,
+        "avg_voltage_v": 1.212,
+        "avg_resistance_ohms": 17228.02
+    },
+    {
+        "angle_degree": 25,
+        "avg_voltage_v": 1.179,
+        "avg_resistance_ohms": 17990.0
+    },
+    {
+        "angle_degree": 30,
+        "avg_voltage_v": 1.055,
+        "avg_resistance_ohms": 21280.32
+    },
+    {
+        "angle_degree": 35,
+        "avg_voltage_v": 1.169,
+        "avg_resistance_ohms": 18229.44
+    },
+    {
+        "angle_degree": 40,
+        "avg_voltage_v": 1.132,
+        "avg_resistance_ohms": 19156.87
+    },
+    {
+        "angle_degree": 45,
+        "avg_voltage_v": 0.661,
+        "avg_resistance_ohms": 39925.37
+    },
+    {
+        "angle_degree": 50,
+        "avg_voltage_v": 0.664,
+        "avg_resistance_ohms": 39701.49
+    },
+    {
+        "angle_degree": 55,
+        "avg_voltage_v": 0.707,
+        "avg_resistance_ohms": 36681.84
+    },
+    {
+        "angle_degree": 60,
+        "avg_voltage_v": 1.136,
+        "avg_resistance_ohms": 19049.84
+    },
+    {
+        "angle_degree": 65,
+        "avg_voltage_v": 0.68,
+        "avg_resistance_ohms": 38529.41
+    },
+    {
+        "angle_degree": 70,
+        "avg_voltage_v": 0.848,
+        "avg_resistance_ohms": 28915.97
+    },
+    {
+        "angle_degree": 75,
+        "avg_voltage_v": 0.697,
+        "avg_resistance_ohms": 37347.83
+    },
+    {
+        "angle_degree": 80,
+        "avg_voltage_v": 0.7,
+        "avg_resistance_ohms": 37142.86
+    },
+    {
+        "angle_degree": 85,
+        "avg_voltage_v": 0.736,
+        "avg_resistance_ohms": 34838.95
+    },
+    {
+        "angle_degree": 90,
+        "avg_voltage_v": 0.73,
+        "avg_resistance_ohms": 35208.87
+    }
+]

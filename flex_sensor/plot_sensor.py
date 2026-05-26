@@ -5,55 +5,42 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-print("🔄 腳本已成功啟動...")
+print("🔄 數據分析與可視化腳本已啟動 (三點分段校正版)...")
 
 # ====================================================
-# 🛠️ 實驗室校正參數與檔案指定設定
+# 🛠️ 1. 物理校正參數設定 (🌟 你的專屬分段校正 DNA)
 # ====================================================
-R_FIXED = 10000.0  
-V_CC = 3.3         
+R_FIXED = 10000.0  # 下拉固定電阻 10k 歐姆
+V_CC = 3.3         # 系統供電 3.3V
 
-V_0 = 1.44    
-V_90 = 0.90   
+# 👇 這裡的數值已經為你同步成下方陣列中的真實測量極值！
+R_0_DEG = 16634.54   # 0度平整電阻 
+R_45_DEG = 42380.95  # 45度彎曲電阻 (從你的實驗數據提取)
+R_90_DEG = 52264.15  # 90度極限電阻 
 
-# 🌟 【在這裡手動指定你要分析的 JSON 檔名】
-# 💡 若設定為 None：會維持自動抓取資料夾內「最新產生的」檔案
-# 💡 若要指定舊檔案：請直接改成字串，例如 SPECIFIED_FILE = "sensor_log_2026-05-17.json"
-SPECIFIED_FILE = None  # <-- 這裡改成你想分析的檔案名稱，或保持 None 以自動抓取最新檔案 
 # ====================================================
+# 📂 2. 實驗資料檔案設定
+# ====================================================
+CONTINUOUS_FILE = None  # 例如 'standup.json' 或 None
 
-# 1. 核心檔案防呆偵測
-if SPECIFIED_FILE is not None:
-    # 走手動指定模式
-    target_file = SPECIFIED_FILE
-    if not os.path.exists(target_file):
-        print(f"❌ 找不到你指定的 JSON 檔案: '{target_file}'")
-        exit()
-    print(f"🎯 手動指定模式：正在分析歷史檔案 ➡️ {target_file}")
-else:
-    # 走原本的自動尋找最新檔案模式
-    json_files = glob.glob('sensor_log_*.json') + glob.glob('sensor_log.json')
-    if not json_files:
-        print("❌ 數據資料夾內找不到任何 JSON 紀錄檔！")
-        exit()
-    target_file = max(json_files, key=os.path.getmtime)
-    print(f"📂 自動偵測模式：成功抓取最新產生的檔案 ➡️ {target_file}")
+# ====================================================
+# 🚀 3. 讀取與處理【連續動態數據】
+# ====================================================
+target_file = CONTINUOUS_FILE
+if target_file is None:
+    json_files = glob.glob('sensor_log_*.json') + glob.glob('sensor_gait_data_*.json') + glob.glob('standup.json')
+    if json_files:
+        target_file = max(json_files, key=os.path.getmtime)
 
-# 2. 讀取數據
 try:
     with open(target_file, 'r', encoding='utf-8') as f:
         data_list = json.load(f)
+    print(f"📂 成功載入連續動態數據 ➡️ {target_file}")
 except Exception as e:
-    print(f"❌ 讀取檔案失敗: {e}")
-    exit()
-
-if not data_list:
-    print("⚠️ 警告：該 JSON 檔案內容為空！")
+    print(f"❌ 讀取連續數據失敗: {e}")
     exit()
 
 voltages = [entry['voltage'] for entry in data_list]
-
-# 3. 解析 JSON 裡的時間戳記，計算出相對於起點的「真實秒數」
 timestamps = [entry['time'] for entry in data_list]
 time_seconds = []
 
@@ -61,73 +48,152 @@ if timestamps:
     start_time = datetime.strptime(timestamps[0], "%Y-%m-%d %H:%M:%S.%f")
     for t_str in timestamps:
         current_t = datetime.strptime(t_str, "%Y-%m-%d %H:%M:%S.%f")
-        delta_seconds = (current_t - start_time).total_seconds()
-        time_seconds.append(delta_seconds)
-else:
-    time_seconds = list(range(len(voltages)))
+        time_seconds.append((current_t - start_time).total_seconds())
 
-# 4. 核心演算法：純 0-90 度映射角度與原始電阻計算
+# 🌟 核心物理重新運算：將電壓重新計算為分段線性角度
 angles = []
 resistors_raw_data = []
 
 for v in voltages:
-    v_clipped = max(min(v, max(V_0, V_90)), min(V_0, V_90))
-    a = (v_clipped - V_0) * (90.0 - 0.0) / (V_90 - V_0)
-    angles.append(a)
-    r_sensor = R_FIXED * (V_CC - v_clipped) / v_clipped
+    v_safe = max(v, 0.01) # 避免電壓為 0 造成數學錯誤
+    
+    # 步驟 1：電壓反推電阻
+    r_sensor = R_FIXED * (V_CC - v_safe) / v_safe
     resistors_raw_data.append(r_sensor)
-
-samples = list(range(len(voltages)))
+    
+    # 步驟 2：核心安全邊界防護 (防護範圍夾在 0度 到 90度之間)
+    r_clipped = max(min(r_sensor, R_90_DEG), R_0_DEG)
+    
+    # 🌟 步驟 3：三點分段線性插值演算法 (Piecewise Linear Interpolation)
+    if r_clipped <= R_45_DEG:
+        # ---- 第一段：0度 ~ 45度 區間 ----
+        a = (r_clipped - R_0_DEG) * (45.0 - 0.0) / (R_45_DEG - R_0_DEG)
+    else:
+        # ---- 第二段：45度 ~ 90度 區間 ----
+        a = 45.0 + (r_clipped - R_45_DEG) * (90.0 - 45.0) / (R_90_DEG - R_45_DEG)
+        
+    angles.append(a)
 
 # ====================================================
-# 🎨 5. 開始畫圖：獨立開啟四個分離視窗
+# 🚀 4. 讀取與處理【5 度步進真實校正數據】(手動輸入版)
+# ====================================================
+cal_angles = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90]
+
+cal_resistors = [
+    16634.54,  # 0度
+    17684.87,  # 5度
+    19152.31,  # 10度
+    24555.92,  # 15度
+    27205.99,  # 20度
+    31302.22,  # 25度
+    34000.0,   # 30度
+    35519.41,  # 35度
+    38674.28,  # 40度
+    42380.95,  # 45度
+    42972.35,  # 50度
+    44188.52,  # 55度
+    43923.85,  # 60度
+    45838.98,  # 65度
+    47595.28,  # 70度
+    48618.42,  # 75度
+    49035.71,  # 80度
+    50888.89,  # 85度
+    52264.15   # 90度
+]
+
+has_calibration = True
+print("📂 成功載入【手動輸入】的真實量角器校正數據！")
+
+# 防呆檢查：確保角度與電阻資料數量一致
+if len(cal_angles) != len(cal_resistors):
+    print(f"❌ 警告：角度數量 ({len(cal_angles)}) 與電阻數量 ({len(cal_resistors)}) 不一致！")
+    has_calibration = False
+
+# ====================================================
+# 🎨 5. 開始畫圖：開啟三個獨立分析視窗
 # ====================================================
 
-# --- 【視窗一：角度對真實時間】 ---
-plt.figure('Joint Angle Over Time', figsize=(8, 5.5))
-plt.plot(time_seconds, angles, color='green', linewidth=2, label='Calculated Angle (0-90° Map)')
-plt.title('Calculated Angle Over Time', fontsize=12, fontweight='bold')
+# --- 【圖表一：分段線性修正後的角度對時間圖】 ---
+plt.figure('1. Joint Angle Over Time', figsize=(8, 5.5))
+plt.plot(time_seconds, angles, color='green', linewidth=2, label='Piecewise Corrected Angle')
+plt.title('Calculated Angle Over Time (3-Point Piecewise Mapped)', fontsize=12, fontweight='bold')
 plt.xlabel('Time (Seconds s)')  
 plt.ylabel('Angle (Degrees °)')
 plt.ylim(-5, 100)
 plt.grid(True, linestyle='--', alpha=0.6)
-plt.legend()
+plt.legend(loc='upper right')
 
-# --- 【視窗二：電壓對真實時間】 ---
-plt.figure('ADC Voltage Over Time', figsize=(8, 5.5))
-plt.plot(time_seconds, voltages, color='blue', linewidth=2, label='Raw Voltage')
-plt.title('ADC Voltage Over Time (Raw Data)', fontsize=12, fontweight='bold')
-plt.axhline(V_0, color='gray', linestyle=':', alpha=0.7, label=f'Flat Baseline ({V_0}V)')
-plt.axhline(V_90, color='gray', linestyle=':', alpha=0.7, label=f'90° Baseline ({V_90}V)')
+# --- 【圖表二：電阻隨時間變化圖】 ---
+plt.figure('2. Sensor Resistance Over Time', figsize=(8, 5.5))
+plt.plot(time_seconds, resistors_raw_data, color='orange', linewidth=2, label='Real-time Resistance')
+plt.title('Sensor Resistance Over Time', fontsize=12, fontweight='bold')
+plt.axhline(R_0_DEG, color='gray', linestyle=':', alpha=0.7, label=f'0° Baseline ({R_0_DEG}Ω)')
+plt.axhline(R_45_DEG, color='lightgray', linestyle='--', alpha=0.7, label=f'45° Pivot ({R_45_DEG}Ω)')
+plt.axhline(R_90_DEG, color='gray', linestyle=':', alpha=0.7, label=f'90° Baseline ({R_90_DEG}Ω)')
 plt.xlabel('Time (Seconds s)')  
-plt.ylabel('Voltage (V)')
-plt.ylim(0.5, 1.6)
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.legend()
+plt.ylabel('Resistance (Ohms Ω)')
 
-# --- 【視窗三：電壓對角度關係】 ---
-plt.figure('ADC Voltage vs. Bending Angle', figsize=(8, 5.5))
-plt.scatter(angles, voltages, color='green', s=6, alpha=0.3, label='Raw Data Points')
-plt.plot([0.0, 90.0], [V_0, V_90], color='red', linestyle='-', marker='o', linewidth=2, label='0-90° Linear Trend Line')
-plt.title('ADC Voltage vs. Bending Angle', fontsize=12, fontweight='bold')
-plt.xlabel('Angle (Degrees °)')
-plt.ylabel('ADC Voltage (V)')
-plt.xlim(-5, 100)
-plt.ylim(0.5, 1.6)
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.legend()
+# 自動計算極值並保留 10% 裕度
+r_min = min(resistors_raw_data)
+r_max = max(resistors_raw_data)
+r_margin = (r_max - r_min) * 0.10
+plt.ylim(r_min - r_margin, r_max + r_margin)  
 
-# --- 【視窗四：電阻對角度關係】 ---
-plt.figure('Sensor Resistance vs. Bending Angle', figsize=(8, 5.5))
-plt.scatter(angles, resistors_raw_data, color='orange', s=6, alpha=0.4, label='Raw Resistance Data')
-z = np.polyfit(angles, resistors_raw_data, 2)
-p = np.poly1d(z)
-plt.plot(sorted(angles), p(sorted(angles)), color='darkorange', linestyle='--', linewidth=1.5, label='Actual Curved Trend')
-plt.title('Sensor Resistance vs. Bending Angle', fontsize=12, fontweight='bold')
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.legend(loc='upper right')
+
+# --- 【圖表三：每 5 度電阻對角度 (分段理論折線 vs 實際量測曲線)】 ---
+plt.figure('3. Resistance vs. Bending Angle (Calibration)', figsize=(9, 6))
+
+# 1. 背景散佈點
+plt.scatter(angles, resistors_raw_data, color='gray', s=5, alpha=0.15, label='Continuous Motion Data')
+
+# 2. 🌟 畫出新的「3點分段線性理論折線」(藍色)
+X_pivots = [0, 45, 90]
+Y_pivots = [R_0_DEG, R_45_DEG, R_90_DEG]
+plt.plot(X_pivots, Y_pivots, color='blue', linestyle='--', linewidth=2, label='3-Point Piecewise Model')
+plt.scatter(X_pivots, Y_pivots, color='blue', marker='o', s=60, zorder=4, label='Calibration Pivots')
+
+# 3. 真實量測點
+if has_calibration:
+    plt.plot(cal_angles, cal_resistors, color='red', linestyle='-', linewidth=2, alpha=0.8, label='Actual Empirical Trend')
+    plt.scatter(cal_angles, cal_resistors, color='red', marker='X', s=80, edgecolor='black', zorder=5, label='Measured 5° Step Points')
+
+plt.title('Calibration: Piecewise Linear Model vs. Empirical Data', fontsize=13, fontweight='bold')
 plt.xlabel('Angle (Degrees °)')
 plt.ylabel('Resistance (Ohms Ω)')
+plt.xlim(-5, 95)
+plt.xticks(np.arange(0, 95, 5)) 
 plt.grid(True, linestyle='--', alpha=0.6)
-plt.legend()
+plt.legend(loc='upper left')
 
-print(f"📊 檔案【{target_file}】分析完成，圖形視窗已成功彈出！")
+
+print(f"📊 分段校正視覺化完成，三個分析視窗已成功彈出！")
+# --- 【圖表四：電壓對角度 (分壓電路的非線性物理展現)】 ---
+plt.figure('4. Voltage vs. Bending Angle', figsize=(8, 5.5))
+
+# 1. 畫出連續動態背景散佈點 (灰點)
+plt.scatter(angles, voltages, color='gray', s=5, alpha=0.3, label='Continuous Motion Data')
+
+# 2. 🌟 核心反推：將你設定的三個電阻基準點，用分壓公式「反算」回理論電壓
+V_0_DEG_theoretical = (R_FIXED * V_CC) / (R_0_DEG + R_FIXED)
+V_45_DEG_theoretical = (R_FIXED * V_CC) / (R_45_DEG + R_FIXED)
+V_90_DEG_theoretical = (R_FIXED * V_CC) / (R_90_DEG + R_FIXED)
+
+X_pivots = [0, 45, 90]
+Y_voltages_pivots = [V_0_DEG_theoretical, V_45_DEG_theoretical, V_90_DEG_theoretical]
+
+# 3. 畫出理論上的紫色電壓折線與轉折點
+plt.plot(X_pivots, Y_voltages_pivots, color='purple', linestyle='--', linewidth=2, label='Theoretical Voltage Model')
+plt.scatter(X_pivots, Y_voltages_pivots, color='purple', marker='o', s=60, zorder=4, label='Voltage Pivots')
+
+plt.title('System Response: ADC Voltage vs. Bending Angle', fontsize=13, fontweight='bold')
+plt.xlabel('Angle (Degrees °)')
+plt.ylabel('Voltage (V)')
+plt.xlim(-5, 95)
+plt.xticks(np.arange(0, 95, 5))
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.legend(loc='upper right')
+
+print(f"📊 第四張圖表 (電壓對角度) 已加入分析列！")
 plt.show()

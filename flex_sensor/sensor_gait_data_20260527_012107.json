@@ -1,0 +1,1255 @@
+[
+    {
+        "time": "2026-05-27 01:21:07.734",
+        "adc_raw": 1770,
+        "voltage": 1.42,
+        "resistance_ohms": 13239.44,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:07.834",
+        "adc_raw": 1764,
+        "voltage": 1.42,
+        "resistance_ohms": 13239.44,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:07.934",
+        "adc_raw": 1757,
+        "voltage": 1.41,
+        "resistance_ohms": 13404.26,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:08.034",
+        "adc_raw": 1746,
+        "voltage": 1.4,
+        "resistance_ohms": 13571.43,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:08.134",
+        "adc_raw": 1747,
+        "voltage": 1.4,
+        "resistance_ohms": 13571.43,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:08.234",
+        "adc_raw": 1739,
+        "voltage": 1.4,
+        "resistance_ohms": 13571.43,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:08.334",
+        "adc_raw": 1726,
+        "voltage": 1.39,
+        "resistance_ohms": 13741.01,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:08.434",
+        "adc_raw": 1660,
+        "voltage": 1.33,
+        "resistance_ohms": 14812.03,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:08.534",
+        "adc_raw": 1617,
+        "voltage": 1.3,
+        "resistance_ohms": 15384.62,
+        "angle": 0.99
+    },
+    {
+        "time": "2026-05-27 01:21:08.634",
+        "adc_raw": 1588,
+        "voltage": 1.27,
+        "resistance_ohms": 15984.25,
+        "angle": 2.53
+    },
+    {
+        "time": "2026-05-27 01:21:08.734",
+        "adc_raw": 1477,
+        "voltage": 1.19,
+        "resistance_ohms": 17731.09,
+        "angle": 7.02
+    },
+    {
+        "time": "2026-05-27 01:21:08.834",
+        "adc_raw": 1370,
+        "voltage": 1.1,
+        "resistance_ohms": 20000.0,
+        "angle": 12.86
+    },
+    {
+        "time": "2026-05-27 01:21:08.934",
+        "adc_raw": 1226,
+        "voltage": 0.98,
+        "resistance_ohms": 23673.47,
+        "angle": 22.3
+    },
+    {
+        "time": "2026-05-27 01:21:09.034",
+        "adc_raw": 1078,
+        "voltage": 0.86,
+        "resistance_ohms": 28372.09,
+        "angle": 34.39
+    },
+    {
+        "time": "2026-05-27 01:21:09.134",
+        "adc_raw": 943,
+        "voltage": 0.75,
+        "resistance_ohms": 34000.0,
+        "angle": 48.86
+    },
+    {
+        "time": "2026-05-27 01:21:09.234",
+        "adc_raw": 863,
+        "voltage": 0.69,
+        "resistance_ohms": 37826.09,
+        "angle": 58.7
+    },
+    {
+        "time": "2026-05-27 01:21:09.334",
+        "adc_raw": 770,
+        "voltage": 0.62,
+        "resistance_ohms": 43225.81,
+        "angle": 72.58
+    },
+    {
+        "time": "2026-05-27 01:21:09.434",
+        "adc_raw": 728,
+        "voltage": 0.58,
+        "resistance_ohms": 46896.55,
+        "angle": 82.02
+    },
+    {
+        "time": "2026-05-27 01:21:09.534",
+        "adc_raw": 713,
+        "voltage": 0.57,
+        "resistance_ohms": 47894.74,
+        "angle": 84.59
+    },
+    {
+        "time": "2026-05-27 01:21:09.634",
+        "adc_raw": 686,
+        "voltage": 0.55,
+        "resistance_ohms": 50000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:09.734",
+        "adc_raw": 649,
+        "voltage": 0.52,
+        "resistance_ohms": 53461.54,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:09.834",
+        "adc_raw": 605,
+        "voltage": 0.48,
+        "resistance_ohms": 58750.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:09.934",
+        "adc_raw": 582,
+        "voltage": 0.46,
+        "resistance_ohms": 61739.13,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.034",
+        "adc_raw": 575,
+        "voltage": 0.46,
+        "resistance_ohms": 61739.13,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.134",
+        "adc_raw": 558,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.234",
+        "adc_raw": 540,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.334",
+        "adc_raw": 536,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.434",
+        "adc_raw": 532,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.534",
+        "adc_raw": 533,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.634",
+        "adc_raw": 526,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.734",
+        "adc_raw": 536,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.834",
+        "adc_raw": 539,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:10.934",
+        "adc_raw": 530,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.034",
+        "adc_raw": 531,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.134",
+        "adc_raw": 532,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.234",
+        "adc_raw": 536,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.334",
+        "adc_raw": 549,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.434",
+        "adc_raw": 553,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.534",
+        "adc_raw": 540,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.634",
+        "adc_raw": 546,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.734",
+        "adc_raw": 544,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.834",
+        "adc_raw": 545,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:11.934",
+        "adc_raw": 570,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.034",
+        "adc_raw": 556,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.134",
+        "adc_raw": 550,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.235",
+        "adc_raw": 559,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.335",
+        "adc_raw": 560,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.434",
+        "adc_raw": 570,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.534",
+        "adc_raw": 574,
+        "voltage": 0.46,
+        "resistance_ohms": 61739.13,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.634",
+        "adc_raw": 566,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.734",
+        "adc_raw": 579,
+        "voltage": 0.46,
+        "resistance_ohms": 61739.13,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.834",
+        "adc_raw": 587,
+        "voltage": 0.47,
+        "resistance_ohms": 60212.77,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:12.934",
+        "adc_raw": 620,
+        "voltage": 0.49,
+        "resistance_ohms": 57346.94,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:13.034",
+        "adc_raw": 646,
+        "voltage": 0.52,
+        "resistance_ohms": 53461.54,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:13.134",
+        "adc_raw": 672,
+        "voltage": 0.54,
+        "resistance_ohms": 51111.11,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:13.234",
+        "adc_raw": 693,
+        "voltage": 0.55,
+        "resistance_ohms": 50000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:13.334",
+        "adc_raw": 702,
+        "voltage": 0.56,
+        "resistance_ohms": 48928.57,
+        "angle": 87.24
+    },
+    {
+        "time": "2026-05-27 01:21:13.435",
+        "adc_raw": 708,
+        "voltage": 0.57,
+        "resistance_ohms": 47894.74,
+        "angle": 84.59
+    },
+    {
+        "time": "2026-05-27 01:21:13.535",
+        "adc_raw": 731,
+        "voltage": 0.58,
+        "resistance_ohms": 46896.55,
+        "angle": 82.02
+    },
+    {
+        "time": "2026-05-27 01:21:13.635",
+        "adc_raw": 743,
+        "voltage": 0.59,
+        "resistance_ohms": 45932.2,
+        "angle": 79.54
+    },
+    {
+        "time": "2026-05-27 01:21:13.735",
+        "adc_raw": 790,
+        "voltage": 0.63,
+        "resistance_ohms": 42380.95,
+        "angle": 70.41
+    },
+    {
+        "time": "2026-05-27 01:21:13.835",
+        "adc_raw": 838,
+        "voltage": 0.67,
+        "resistance_ohms": 39253.73,
+        "angle": 62.37
+    },
+    {
+        "time": "2026-05-27 01:21:13.935",
+        "adc_raw": 905,
+        "voltage": 0.72,
+        "resistance_ohms": 35833.33,
+        "angle": 53.57
+    },
+    {
+        "time": "2026-05-27 01:21:14.035",
+        "adc_raw": 978,
+        "voltage": 0.78,
+        "resistance_ohms": 32307.69,
+        "angle": 44.51
+    },
+    {
+        "time": "2026-05-27 01:21:14.135",
+        "adc_raw": 1082,
+        "voltage": 0.87,
+        "resistance_ohms": 27931.03,
+        "angle": 33.25
+    },
+    {
+        "time": "2026-05-27 01:21:14.235",
+        "adc_raw": 1178,
+        "voltage": 0.94,
+        "resistance_ohms": 25106.38,
+        "angle": 25.99
+    },
+    {
+        "time": "2026-05-27 01:21:14.335",
+        "adc_raw": 1280,
+        "voltage": 1.03,
+        "resistance_ohms": 22038.83,
+        "angle": 18.1
+    },
+    {
+        "time": "2026-05-27 01:21:14.435",
+        "adc_raw": 1354,
+        "voltage": 1.09,
+        "resistance_ohms": 20275.23,
+        "angle": 13.56
+    },
+    {
+        "time": "2026-05-27 01:21:14.535",
+        "adc_raw": 1476,
+        "voltage": 1.18,
+        "resistance_ohms": 17966.1,
+        "angle": 7.63
+    },
+    {
+        "time": "2026-05-27 01:21:14.635",
+        "adc_raw": 1530,
+        "voltage": 1.23,
+        "resistance_ohms": 16829.27,
+        "angle": 4.7
+    },
+    {
+        "time": "2026-05-27 01:21:14.735",
+        "adc_raw": 1501,
+        "voltage": 1.2,
+        "resistance_ohms": 17500.0,
+        "angle": 6.43
+    },
+    {
+        "time": "2026-05-27 01:21:14.835",
+        "adc_raw": 1464,
+        "voltage": 1.17,
+        "resistance_ohms": 18205.13,
+        "angle": 8.24
+    },
+    {
+        "time": "2026-05-27 01:21:14.935",
+        "adc_raw": 1444,
+        "voltage": 1.16,
+        "resistance_ohms": 18448.28,
+        "angle": 8.87
+    },
+    {
+        "time": "2026-05-27 01:21:15.035",
+        "adc_raw": 1442,
+        "voltage": 1.16,
+        "resistance_ohms": 18448.28,
+        "angle": 8.87
+    },
+    {
+        "time": "2026-05-27 01:21:15.135",
+        "adc_raw": 1403,
+        "voltage": 1.13,
+        "resistance_ohms": 19203.54,
+        "angle": 10.81
+    },
+    {
+        "time": "2026-05-27 01:21:15.235",
+        "adc_raw": 1351,
+        "voltage": 1.08,
+        "resistance_ohms": 20555.56,
+        "angle": 14.29
+    },
+    {
+        "time": "2026-05-27 01:21:15.335",
+        "adc_raw": 1348,
+        "voltage": 1.08,
+        "resistance_ohms": 20555.56,
+        "angle": 14.29
+    },
+    {
+        "time": "2026-05-27 01:21:15.435",
+        "adc_raw": 1346,
+        "voltage": 1.08,
+        "resistance_ohms": 20555.56,
+        "angle": 14.29
+    },
+    {
+        "time": "2026-05-27 01:21:15.535",
+        "adc_raw": 1293,
+        "voltage": 1.04,
+        "resistance_ohms": 21730.77,
+        "angle": 17.31
+    },
+    {
+        "time": "2026-05-27 01:21:15.639",
+        "adc_raw": 1188,
+        "voltage": 0.95,
+        "resistance_ohms": 24736.84,
+        "angle": 25.04
+    },
+    {
+        "time": "2026-05-27 01:21:15.735",
+        "adc_raw": 1082,
+        "voltage": 0.87,
+        "resistance_ohms": 27931.03,
+        "angle": 33.25
+    },
+    {
+        "time": "2026-05-27 01:21:15.835",
+        "adc_raw": 1008,
+        "voltage": 0.81,
+        "resistance_ohms": 30740.74,
+        "angle": 40.48
+    },
+    {
+        "time": "2026-05-27 01:21:15.935",
+        "adc_raw": 926,
+        "voltage": 0.74,
+        "resistance_ohms": 34594.59,
+        "angle": 50.39
+    },
+    {
+        "time": "2026-05-27 01:21:16.035",
+        "adc_raw": 881,
+        "voltage": 0.7,
+        "resistance_ohms": 37142.86,
+        "angle": 56.94
+    },
+    {
+        "time": "2026-05-27 01:21:16.135",
+        "adc_raw": 814,
+        "voltage": 0.65,
+        "resistance_ohms": 40769.23,
+        "angle": 66.26
+    },
+    {
+        "time": "2026-05-27 01:21:16.235",
+        "adc_raw": 762,
+        "voltage": 0.61,
+        "resistance_ohms": 44098.36,
+        "angle": 74.82
+    },
+    {
+        "time": "2026-05-27 01:21:16.335",
+        "adc_raw": 726,
+        "voltage": 0.58,
+        "resistance_ohms": 46896.55,
+        "angle": 82.02
+    },
+    {
+        "time": "2026-05-27 01:21:16.435",
+        "adc_raw": 675,
+        "voltage": 0.54,
+        "resistance_ohms": 51111.11,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:16.535",
+        "adc_raw": 664,
+        "voltage": 0.53,
+        "resistance_ohms": 52264.15,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:16.635",
+        "adc_raw": 621,
+        "voltage": 0.5,
+        "resistance_ohms": 56000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:16.735",
+        "adc_raw": 601,
+        "voltage": 0.48,
+        "resistance_ohms": 58750.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:16.835",
+        "adc_raw": 596,
+        "voltage": 0.48,
+        "resistance_ohms": 58750.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:16.935",
+        "adc_raw": 575,
+        "voltage": 0.46,
+        "resistance_ohms": 61739.13,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.035",
+        "adc_raw": 563,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.135",
+        "adc_raw": 566,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.235",
+        "adc_raw": 564,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.335",
+        "adc_raw": 549,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.435",
+        "adc_raw": 549,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.535",
+        "adc_raw": 545,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.635",
+        "adc_raw": 548,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.735",
+        "adc_raw": 548,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.835",
+        "adc_raw": 557,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:17.935",
+        "adc_raw": 555,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.035",
+        "adc_raw": 552,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.135",
+        "adc_raw": 555,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.235",
+        "adc_raw": 557,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.335",
+        "adc_raw": 560,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.435",
+        "adc_raw": 558,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.535",
+        "adc_raw": 560,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.635",
+        "adc_raw": 554,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.735",
+        "adc_raw": 576,
+        "voltage": 0.46,
+        "resistance_ohms": 61739.13,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.835",
+        "adc_raw": 590,
+        "voltage": 0.47,
+        "resistance_ohms": 60212.77,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:18.935",
+        "adc_raw": 612,
+        "voltage": 0.49,
+        "resistance_ohms": 57346.94,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:19.035",
+        "adc_raw": 628,
+        "voltage": 0.5,
+        "resistance_ohms": 56000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:19.135",
+        "adc_raw": 648,
+        "voltage": 0.52,
+        "resistance_ohms": 53461.54,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:19.235",
+        "adc_raw": 680,
+        "voltage": 0.54,
+        "resistance_ohms": 51111.11,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:19.335",
+        "adc_raw": 715,
+        "voltage": 0.57,
+        "resistance_ohms": 47894.74,
+        "angle": 84.59
+    },
+    {
+        "time": "2026-05-27 01:21:19.435",
+        "adc_raw": 759,
+        "voltage": 0.61,
+        "resistance_ohms": 44098.36,
+        "angle": 74.82
+    },
+    {
+        "time": "2026-05-27 01:21:19.535",
+        "adc_raw": 778,
+        "voltage": 0.62,
+        "resistance_ohms": 43225.81,
+        "angle": 72.58
+    },
+    {
+        "time": "2026-05-27 01:21:19.635",
+        "adc_raw": 822,
+        "voltage": 0.66,
+        "resistance_ohms": 40000.0,
+        "angle": 64.29
+    },
+    {
+        "time": "2026-05-27 01:21:19.735",
+        "adc_raw": 887,
+        "voltage": 0.71,
+        "resistance_ohms": 36478.87,
+        "angle": 55.23
+    },
+    {
+        "time": "2026-05-27 01:21:19.835",
+        "adc_raw": 976,
+        "voltage": 0.78,
+        "resistance_ohms": 32307.69,
+        "angle": 44.51
+    },
+    {
+        "time": "2026-05-27 01:21:19.935",
+        "adc_raw": 1080,
+        "voltage": 0.87,
+        "resistance_ohms": 27931.03,
+        "angle": 33.25
+    },
+    {
+        "time": "2026-05-27 01:21:20.035",
+        "adc_raw": 1179,
+        "voltage": 0.95,
+        "resistance_ohms": 24736.84,
+        "angle": 25.04
+    },
+    {
+        "time": "2026-05-27 01:21:20.135",
+        "adc_raw": 1276,
+        "voltage": 1.02,
+        "resistance_ohms": 22352.94,
+        "angle": 18.91
+    },
+    {
+        "time": "2026-05-27 01:21:20.235",
+        "adc_raw": 1374,
+        "voltage": 1.1,
+        "resistance_ohms": 20000.0,
+        "angle": 12.86
+    },
+    {
+        "time": "2026-05-27 01:21:20.335",
+        "adc_raw": 1462,
+        "voltage": 1.17,
+        "resistance_ohms": 18205.13,
+        "angle": 8.24
+    },
+    {
+        "time": "2026-05-27 01:21:20.435",
+        "adc_raw": 1583,
+        "voltage": 1.27,
+        "resistance_ohms": 15984.25,
+        "angle": 2.53
+    },
+    {
+        "time": "2026-05-27 01:21:20.535",
+        "adc_raw": 1704,
+        "voltage": 1.37,
+        "resistance_ohms": 14087.59,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:20.635",
+        "adc_raw": 1802,
+        "voltage": 1.45,
+        "resistance_ohms": 12758.62,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:20.735",
+        "adc_raw": 1882,
+        "voltage": 1.51,
+        "resistance_ohms": 11854.3,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:20.835",
+        "adc_raw": 1914,
+        "voltage": 1.54,
+        "resistance_ohms": 11428.57,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:20.935",
+        "adc_raw": 1913,
+        "voltage": 1.54,
+        "resistance_ohms": 11428.57,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:21.035",
+        "adc_raw": 1896,
+        "voltage": 1.52,
+        "resistance_ohms": 11710.53,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:21.135",
+        "adc_raw": 1867,
+        "voltage": 1.5,
+        "resistance_ohms": 12000.0,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:21.235",
+        "adc_raw": 1812,
+        "voltage": 1.46,
+        "resistance_ohms": 12602.74,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:21.335",
+        "adc_raw": 1736,
+        "voltage": 1.39,
+        "resistance_ohms": 13741.01,
+        "angle": 0.0
+    },
+    {
+        "time": "2026-05-27 01:21:21.435",
+        "adc_raw": 1628,
+        "voltage": 1.31,
+        "resistance_ohms": 15190.84,
+        "angle": 0.49
+    },
+    {
+        "time": "2026-05-27 01:21:21.535",
+        "adc_raw": 1514,
+        "voltage": 1.22,
+        "resistance_ohms": 17049.18,
+        "angle": 5.27
+    },
+    {
+        "time": "2026-05-27 01:21:21.636",
+        "adc_raw": 1408,
+        "voltage": 1.13,
+        "resistance_ohms": 19203.54,
+        "angle": 10.81
+    },
+    {
+        "time": "2026-05-27 01:21:21.736",
+        "adc_raw": 1274,
+        "voltage": 1.02,
+        "resistance_ohms": 22352.94,
+        "angle": 18.91
+    },
+    {
+        "time": "2026-05-27 01:21:21.892",
+        "adc_raw": 1125,
+        "voltage": 0.9,
+        "resistance_ohms": 26666.67,
+        "angle": 30.0
+    },
+    {
+        "time": "2026-05-27 01:21:21.935",
+        "adc_raw": 1032,
+        "voltage": 0.83,
+        "resistance_ohms": 29759.04,
+        "angle": 37.95
+    },
+    {
+        "time": "2026-05-27 01:21:22.035",
+        "adc_raw": 958,
+        "voltage": 0.77,
+        "resistance_ohms": 32857.14,
+        "angle": 45.92
+    },
+    {
+        "time": "2026-05-27 01:21:22.135",
+        "adc_raw": 890,
+        "voltage": 0.71,
+        "resistance_ohms": 36478.87,
+        "angle": 55.23
+    },
+    {
+        "time": "2026-05-27 01:21:22.235",
+        "adc_raw": 782,
+        "voltage": 0.63,
+        "resistance_ohms": 42380.95,
+        "angle": 70.41
+    },
+    {
+        "time": "2026-05-27 01:21:22.335",
+        "adc_raw": 725,
+        "voltage": 0.58,
+        "resistance_ohms": 46896.55,
+        "angle": 82.02
+    },
+    {
+        "time": "2026-05-27 01:21:22.435",
+        "adc_raw": 678,
+        "voltage": 0.54,
+        "resistance_ohms": 51111.11,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:22.535",
+        "adc_raw": 646,
+        "voltage": 0.52,
+        "resistance_ohms": 53461.54,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:22.635",
+        "adc_raw": 619,
+        "voltage": 0.49,
+        "resistance_ohms": 57346.94,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:22.735",
+        "adc_raw": 609,
+        "voltage": 0.49,
+        "resistance_ohms": 57346.94,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:22.835",
+        "adc_raw": 590,
+        "voltage": 0.47,
+        "resistance_ohms": 60212.77,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:22.935",
+        "adc_raw": 572,
+        "voltage": 0.46,
+        "resistance_ohms": 61739.13,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.035",
+        "adc_raw": 570,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.135",
+        "adc_raw": 562,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.235",
+        "adc_raw": 557,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.336",
+        "adc_raw": 544,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.436",
+        "adc_raw": 548,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.535",
+        "adc_raw": 541,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.636",
+        "adc_raw": 532,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.736",
+        "adc_raw": 531,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.835",
+        "adc_raw": 523,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:23.936",
+        "adc_raw": 527,
+        "voltage": 0.42,
+        "resistance_ohms": 68571.43,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.035",
+        "adc_raw": 537,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.136",
+        "adc_raw": 544,
+        "voltage": 0.43,
+        "resistance_ohms": 66744.19,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.236",
+        "adc_raw": 549,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.336",
+        "adc_raw": 550,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.436",
+        "adc_raw": 564,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.536",
+        "adc_raw": 558,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.636",
+        "adc_raw": 559,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.736",
+        "adc_raw": 558,
+        "voltage": 0.44,
+        "resistance_ohms": 65000.0,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.836",
+        "adc_raw": 559,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:24.936",
+        "adc_raw": 562,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:25.036",
+        "adc_raw": 564,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:25.136",
+        "adc_raw": 562,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:25.236",
+        "adc_raw": 564,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:25.336",
+        "adc_raw": 564,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:25.436",
+        "adc_raw": 566,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    },
+    {
+        "time": "2026-05-27 01:21:25.536",
+        "adc_raw": 566,
+        "voltage": 0.45,
+        "resistance_ohms": 63333.33,
+        "angle": 90.0
+    }
+]
