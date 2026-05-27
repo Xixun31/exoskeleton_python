@@ -146,7 +146,7 @@ plt.legend(loc='upper right')
 plt.figure('3. Resistance vs. Bending Angle (Calibration)', figsize=(9, 6))
 
 # 1. 背景散佈點
-plt.scatter(angles, resistors_raw_data, color='gray', s=5, alpha=0.15, label='Continuous Motion Data')
+#plt.scatter(angles, resistors_raw_data, color='gray', s=5, alpha=0.15, label='Continuous Motion Data')
 
 # 2. 🌟 畫出新的「3點分段線性理論折線」(藍色)
 X_pivots = [0, 45, 90]
@@ -172,10 +172,11 @@ print(f"📊 分段校正視覺化完成，三個分析視窗已成功彈出！"
 # --- 【圖表四：電壓對角度 (分壓電路的非線性物理展現)】 ---
 plt.figure('4. Voltage vs. Bending Angle', figsize=(8, 5.5))
 
-# 1. 畫出連續動態背景散佈點 (灰點)
-plt.scatter(angles, voltages, color='gray', s=5, alpha=0.3, label='Continuous Motion Data')
+# 1. 背景散佈點 (連續動態測試數據)
+#plt.scatter(angles, voltages, color='gray', s=5, alpha=0.3, label='Continuous Motion Data')
 
-# 2. 🌟 核心反推：將你設定的三個電阻基準點，用分壓公式「反算」回理論電壓
+# 2. 理論分段模型 (紫色的三點折線)
+# 這裡保留理論值，用來跟你的真實量測值做完美的對比！
 V_0_DEG_theoretical = (R_FIXED * V_CC) / (R_0_DEG + R_FIXED)
 V_45_DEG_theoretical = (R_FIXED * V_CC) / (R_45_DEG + R_FIXED)
 V_90_DEG_theoretical = (R_FIXED * V_CC) / (R_90_DEG + R_FIXED)
@@ -183,9 +184,37 @@ V_90_DEG_theoretical = (R_FIXED * V_CC) / (R_90_DEG + R_FIXED)
 X_pivots = [0, 45, 90]
 Y_voltages_pivots = [V_0_DEG_theoretical, V_45_DEG_theoretical, V_90_DEG_theoretical]
 
-# 3. 畫出理論上的紫色電壓折線與轉折點
-plt.plot(X_pivots, Y_voltages_pivots, color='purple', linestyle='--', linewidth=2, label='Theoretical Voltage Model')
+plt.plot(X_pivots, Y_voltages_pivots, color='purple', linestyle='--', linewidth=2, label='3-Point Theoretical Voltage Model')
 plt.scatter(X_pivots, Y_voltages_pivots, color='purple', marker='o', s=60, zorder=4, label='Voltage Pivots')
+
+# 3. 🌟 真實每 5 度量測的電壓數據 (直接貼上你的 Excel 數據)
+if has_calibration:
+    # 👇 請把你在 Excel 裡量到的 19 個電壓值，依照 0度 到 90度的順序填入這裡：
+    cal_voltages_measured = [
+        1.239,  # 0度 (範例數字，請替換成你的 Excel 數據)
+        1.192,  # 5度
+        1.132,  # 10度
+        0.955,  # 15度
+        0.887,  # 20度
+        0.799,  # 25度
+        0.75,  # 30度
+        0.725,  # 35度
+        0.678,  # 40度
+        0.63,  # 45度
+        0.623,  # 50度
+        0.609,  # 55度
+        0.612,  # 60度
+        0.591,  # 65度
+        0.573,  # 70度
+        0.563,  # 75度
+        0.559,  # 80度
+        0.542,  # 85度
+        0.541   # 90度
+    ]
+    
+    # 畫出你的真實 Excel 電壓紅線
+    plt.plot(cal_angles, cal_voltages_measured, color='red', linestyle='-', linewidth=2, alpha=0.8, label='Actual Empirical Voltage Trend')
+    plt.scatter(cal_angles, cal_voltages_measured, color='red', marker='X', s=80, edgecolor='black', zorder=5, label='Measured 5° Step Points')
 
 plt.title('System Response: ADC Voltage vs. Bending Angle', fontsize=13, fontweight='bold')
 plt.xlabel('Angle (Degrees °)')
@@ -195,5 +224,5 @@ plt.xticks(np.arange(0, 95, 5))
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.legend(loc='upper right')
 
-print(f"📊 第四張圖表 (電壓對角度) 已加入分析列！")
+print(f"📊 第四張圖表 (含直接輸入的 Excel 真實電壓曲線) 已加入分析列！")
 plt.show()
