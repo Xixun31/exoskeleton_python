@@ -110,51 +110,54 @@ if len(cal_angles) != len(cal_resistors):
     has_calibration = False
 
 # ====================================================
-# 🎨 5. 開始畫圖：開啟三個獨立分析視窗
+# 🎨 5. 開始畫圖：開啟分析視窗 (圖一與圖二合併雙 Y 軸)
 # ====================================================
 
-# --- 【圖表一：分段線性修正後的角度對時間圖】 ---
-plt.figure('1. Joint Angle Over Time', figsize=(8, 5.5))
-plt.plot(time_seconds, angles, color='green', linewidth=2, label='Piecewise Corrected Angle')
-plt.title('Calculated Angle Over Time (3-Point Piecewise Mapped)', fontsize=12, fontweight='bold')
-plt.xlabel('Time (Seconds s)')  
-plt.ylabel('Angle (Degrees °)')
-plt.ylim(-5, 100)
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.legend(loc='upper right')
+# --- 【圖表一 & 二合併：角度與電阻隨時間變化圖 (雙 Y 軸)】 ---
+fig, ax1 = plt.subplots(figsize=(10, 6), num='1 & 2. Angle and Resistance Over Time')
+plt.title('Calculated Angle & Sensor Resistance Over Time', fontsize=13, fontweight='bold')
 
-# --- 【圖表二：電阻隨時間變化圖】 ---
-plt.figure('2. Sensor Resistance Over Time', figsize=(8, 5.5))
-plt.plot(time_seconds, resistors_raw_data, color='orange', linewidth=2, label='Real-time Resistance')
-plt.title('Sensor Resistance Over Time', fontsize=12, fontweight='bold')
-plt.axhline(R_0_DEG, color='gray', linestyle=':', alpha=0.7, label=f'0° Baseline ({R_0_DEG}Ω)')
-plt.axhline(R_45_DEG, color='lightgray', linestyle='--', alpha=0.7, label=f'45° Pivot ({R_45_DEG}Ω)')
-plt.axhline(R_90_DEG, color='gray', linestyle=':', alpha=0.7, label=f'90° Baseline ({R_90_DEG}Ω)')
-plt.xlabel('Time (Seconds s)')  
-plt.ylabel('Resistance (Ohms Ω)')
+# 🟢 繪製左側 Y 軸：分段線性修正後的角度
+color1 = 'green'
+ax1.set_xlabel('Time (Seconds s)')
+ax1.set_ylabel('Angle (Degrees °)', color=color1)
+line1 = ax1.plot(time_seconds, angles, color=color1, linewidth=2, label='Piecewise Corrected Angle')
+ax1.tick_params(axis='y', labelcolor=color1)
+ax1.set_ylim(-5, 100)
+ax1.grid(True, linestyle='--', alpha=0.6)
+
+# 🟠 建立共用 X 軸的右側 Y 軸：電阻變化
+ax2 = ax1.twinx()  
+color2 = 'orange'
+ax2.set_ylabel('Resistance (Ohms Ω)', color=color2)
+line2 = ax2.plot(time_seconds, resistors_raw_data, color=color2, linewidth=2, label='Real-time Resistance')
+ax2.tick_params(axis='y', labelcolor=color2)
 
 # 自動計算極值並保留 10% 裕度
-r_min = min(resistors_raw_data)
-r_max = max(resistors_raw_data)
-r_margin = (r_max - r_min) * 0.10
-plt.ylim(r_min - r_margin, r_max + r_margin)  
+if resistors_raw_data:
+    r_min = min(resistors_raw_data)
+    r_max = max(resistors_raw_data)
+    r_margin = (r_max - r_min) * 0.10
+    ax2.set_ylim(r_min - r_margin, r_max + r_margin)  
 
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.legend(loc='upper right')
+# 加入電阻參考線
+line3 = ax2.axhline(R_0_DEG, color='gray', linestyle=':', alpha=0.7, label=f'0° Baseline ({R_0_DEG}Ω)')
+line4 = ax2.axhline(R_45_DEG, color='lightgray', linestyle='--', alpha=0.7, label=f'45° Pivot ({R_45_DEG}Ω)')
+line5 = ax2.axhline(R_90_DEG, color='gray', linestyle=':', alpha=0.7, label=f'90° Baseline ({R_90_DEG}Ω)')
+
+# 合併兩個 Y 軸的圖例 (Legend)
+lines_1, labels_1 = ax1.get_legend_handles_labels()
+lines_2, labels_2 = ax2.get_legend_handles_labels()
+ax1.legend(lines_1 + lines_2, labels_1 + labels_2, loc='upper left', bbox_to_anchor=(0.02, 0.98))
 
 # --- 【圖表三：每 5 度電阻對角度 (分段理論折線 vs 實際量測曲線)】 ---
 plt.figure('3. Resistance vs. Bending Angle (Calibration)', figsize=(9, 6))
 
-# 1. 背景散佈點
-#plt.scatter(angles, resistors_raw_data, color='gray', s=5, alpha=0.15, label='Continuous Motion Data')
-
-# 2. 🌟 畫出新的「3點分段線性理論折線」(藍色)
 X_pivots = [0, 45, 90]
 Y_pivots = [R_0_DEG, R_45_DEG, R_90_DEG]
 plt.plot(X_pivots, Y_pivots, color='blue', linestyle='--', linewidth=2, label='3-Point Piecewise Model')
 plt.scatter(X_pivots, Y_pivots, color='blue', marker='o', s=60, zorder=4, label='Calibration Pivots')
 
-# 3. 真實量測點
 if has_calibration:
     plt.plot(cal_angles, cal_resistors, color='red', linestyle='-', linewidth=2, alpha=0.8, label='Actual Empirical Trend')
     plt.scatter(cal_angles, cal_resistors, color='red', marker='X', s=80, edgecolor='black', zorder=5, label='Measured 5° Step Points')
@@ -167,52 +170,23 @@ plt.xticks(np.arange(0, 95, 5))
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.legend(loc='upper left')
 
-
-print(f"📊 分段校正視覺化完成，三個分析視窗已成功彈出！")
 # --- 【圖表四：電壓對角度 (分壓電路的非線性物理展現)】 ---
 plt.figure('4. Voltage vs. Bending Angle', figsize=(8, 5.5))
 
-# 1. 背景散佈點 (連續動態測試數據)
-#plt.scatter(angles, voltages, color='gray', s=5, alpha=0.3, label='Continuous Motion Data')
-
-# 2. 理論分段模型 (紫色的三點折線)
-# 這裡保留理論值，用來跟你的真實量測值做完美的對比！
 V_0_DEG_theoretical = (R_FIXED * V_CC) / (R_0_DEG + R_FIXED)
 V_45_DEG_theoretical = (R_FIXED * V_CC) / (R_45_DEG + R_FIXED)
 V_90_DEG_theoretical = (R_FIXED * V_CC) / (R_90_DEG + R_FIXED)
 
-X_pivots = [0, 45, 90]
 Y_voltages_pivots = [V_0_DEG_theoretical, V_45_DEG_theoretical, V_90_DEG_theoretical]
 
 plt.plot(X_pivots, Y_voltages_pivots, color='purple', linestyle='--', linewidth=2, label='3-Point Theoretical Voltage Model')
 plt.scatter(X_pivots, Y_voltages_pivots, color='purple', marker='o', s=60, zorder=4, label='Voltage Pivots')
 
-# 3. 🌟 真實每 5 度量測的電壓數據 (直接貼上你的 Excel 數據)
 if has_calibration:
-    # 👇 請把你在 Excel 裡量到的 19 個電壓值，依照 0度 到 90度的順序填入這裡：
     cal_voltages_measured = [
-        1.239,  # 0度 (範例數字，請替換成你的 Excel 數據)
-        1.192,  # 5度
-        1.132,  # 10度
-        0.955,  # 15度
-        0.887,  # 20度
-        0.799,  # 25度
-        0.75,  # 30度
-        0.725,  # 35度
-        0.678,  # 40度
-        0.63,  # 45度
-        0.623,  # 50度
-        0.609,  # 55度
-        0.612,  # 60度
-        0.591,  # 65度
-        0.573,  # 70度
-        0.563,  # 75度
-        0.559,  # 80度
-        0.542,  # 85度
-        0.541   # 90度
+        1.239, 1.192, 1.132, 0.955, 0.887, 0.799, 0.75, 0.725, 0.678, 
+        0.63, 0.623, 0.609, 0.612, 0.591, 0.573, 0.563, 0.559, 0.542, 0.541   
     ]
-    
-    # 畫出你的真實 Excel 電壓紅線
     plt.plot(cal_angles, cal_voltages_measured, color='red', linestyle='-', linewidth=2, alpha=0.8, label='Actual Empirical Voltage Trend')
     plt.scatter(cal_angles, cal_voltages_measured, color='red', marker='X', s=80, edgecolor='black', zorder=5, label='Measured 5° Step Points')
 
@@ -224,5 +198,5 @@ plt.xticks(np.arange(0, 95, 5))
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.legend(loc='upper right')
 
-print(f"📊 第四張圖表 (含直接輸入的 Excel 真實電壓曲線) 已加入分析列！")
+print(f"📊 視覺化完成，圖一與圖二已成功疊加為雙 Y 軸圖表！")
 plt.show()
