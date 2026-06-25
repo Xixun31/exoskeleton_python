@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 from threading import Thread
 
 # ================= 設定區 =================
-SERIAL_PORT = '/dev/cu.usbserial-10' 
+SERIAL_PORT = '/dev/ttyUSB0' 
 BAUD_RATE = 115200  
 HISTORY_SIZE = 100  # 圖表顯示最近 100 筆數據
 # ==========================================
@@ -36,12 +36,21 @@ def serial_reader():
             # 1. 尋找 Preamble 0xFA 和 BusID 0xFF
             if ser.read(1) == b'\xFA':
                 if ser.read(1) == b'\xFF':
-                    mid = ord(ser.read(1))
-                    length = ord(ser.read(1))
+                    mid_byte = ser.read(1)
+                    len_byte = ser.read(1)
+                    if not mid_byte or not len_byte:
+                        continue
+                    mid = mid_byte[0]
+                    length = len_byte[0]
                     if length == 255:
-                        length = struct.unpack('>H', ser.read(2))[0]
+                        len_bytes = ser.read(2)
+                        if len(len_bytes) < 2:
+                            continue
+                        length = struct.unpack('>H', len_bytes)[0]
                     
                     payload = ser.read(length)
+                    if len(payload) < length:
+                        continue
                     ser.read(1) # Checksum
                     
                     if mid == 0x36: # MTData2 封包

@@ -1,7 +1,9 @@
 import serial
+import glob
 
-# ⚠️ 請把這裡換成你用 ls /dev/cu.usb* 找到的 STM32 路徑
-COM_PORT = '/dev/cu.usbmodem103'  
+# ⚠️ 自動偵測 /dev/ttyACM*，若無則使用預設 /dev/ttyACM0
+ports = glob.glob('/dev/ttyACM*')
+COM_PORT = ports[0] if ports else '/dev/ttyACM0'
 BAUD_RATE = 115200
 
 def main():

@@ -5,9 +5,13 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from threading import Thread
 
+import glob
+
 # ================= 設定區 =================
-PORT = '/dev/ttyACM0'  # 請確認你的埠號是否還是 103
-BAUD = 115200
+# 自動偵測 /dev/ttyACM*，若無則使用預設 /dev/ttyACM0
+ports = glob.glob('/dev/ttyACM*')
+PORT = ports[0] if ports else '/dev/ttyACM0'         # STM32 虛擬串口路徑
+BAUD = 115200                 # 鮑率
 HISTORY_SIZE = 100            # 圖表顯示最近 100 筆數據
 # ==========================================
 
@@ -30,7 +34,7 @@ def serial_reader():
         # 開啟 Serial
         ser = serial.Serial(PORT, BAUD, timeout=1)
         ser.reset_input_buffer()
-        print(f"成功連線至 STM32 ({PORT})，開始解析並繪圖...")
+        print(f"成功連線至 STM32 SPI IMU ({PORT})，開始解析並繪圖...")
         
         while True:
             # 讀取一行純文字
@@ -60,17 +64,14 @@ def serial_reader():
                     gyro_data['y'].append(float(nums[7]))
                     gyro_data['z'].append(float(nums[8]))
                     
-                    # 可以在背景印出最新抓到的 Roll 角度，確認解析正常
-                    # print(f"最新 Roll 角度: {float(nums[0])}") 
-                    
                 except ValueError:
                     pass
     except Exception as e:
         print(f"串口錯誤: {e}")
 
-# --- 繪圖設定 (介面與之前一模一樣) ---
+# --- 繪圖設定 ---
 fig, (ax_e, ax_a, ax_g) = plt.subplots(3, 1, figsize=(10, 12))
-fig.canvas.manager.set_window_title('STM32 IMU Real-time Monitor')
+fig.canvas.manager.set_window_title('STM32 IMU Real-time Monitor (SPI Mode)')
 
 def animate(frame):
     # 1. 繪製歐拉角
