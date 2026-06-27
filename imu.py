@@ -5,8 +5,17 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from threading import Thread
 
+import platform
+
 # ================= 設定區 =================
-SERIAL_PORT = '/dev/ttyUSB0' 
+current_os = platform.system()
+if current_os == "Windows":
+    SERIAL_PORT = 'COM7'                 # 專屬你的 Windows COM 埠
+elif current_os == "Darwin":
+    SERIAL_PORT = '/dev/cu.usbmodem1103' # 備用：macOS 的 USB 埠
+else:
+    SERIAL_PORT = '/dev/ttyUSB0'         # 備用：Linux / 樹莓派的 USB 轉接埠
+
 BAUD_RATE = 115200  
 HISTORY_SIZE = 100  # 圖表顯示最近 100 筆數據
 # ==========================================

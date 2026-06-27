@@ -7,10 +7,18 @@ from threading import Thread
 
 import glob
 
+import platform
+
 # ================= 設定區 =================
-# 自動偵測 /dev/ttyACM*，若無則使用預設 /dev/ttyACM0
-ports = glob.glob('/dev/ttyACM*')
-PORT = ports[0] if ports else '/dev/ttyACM0'         # STM32 虛擬串口路徑
+current_os = platform.system()
+if current_os == "Windows":
+    PORT = 'COM7'                # Windows 的 COM 埠
+elif current_os == "Darwin":
+    PORT = '/dev/cu.usbmodem1103' # macOS (MacBook) 的 USB 埠
+else:
+    # Linux 系統 (若你用 STM32 開發板直連，通常是 ttyACM0；若是 TTL 轉接板則是 ttyUSB0)
+    PORT = '/dev/ttyACM0'
+
 BAUD = 115200                 # 鮑率
 HISTORY_SIZE = 100            # 圖表顯示最近 100 筆數據
 # ==========================================
