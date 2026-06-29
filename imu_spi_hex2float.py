@@ -20,7 +20,7 @@ else:
     # Linux 系統 (若你用 STM32 開發板直連，通常是 ttyACM0；若是 TTL 轉接板則是 ttyUSB0)
     PORT = '/dev/ttyACM0'
 
-BAUD = 9600                 # 鮑率
+BAUD = 115200                 # 鮑率
 HISTORY_SIZE = 100            # 圖表顯示最近 100 筆數據
 # ==========================================
 
