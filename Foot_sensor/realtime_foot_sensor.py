@@ -8,18 +8,25 @@ from threading import Thread
 # ================= 設定區 =================
 COM_PORT = 'COM8'
 BAUD_RATE = 115200
-HISTORY_SIZE = 100  # 圖表顯示最近 100 筆數據
+HISTORY_SIZE = 150  # 稍微拉長顯示範圍，讓波形更好看
+Y_MAX = 75000       # 鎖死 Y 軸天花板，避免畫面垂直跳動
 # ==========================================
 
-# 建立雙腳的即時數據容器 (只需保留 total)
+# 新增：絕對時間軸 x_data
+x_data = collections.deque([0]*HISTORY_SIZE, maxlen=HISTORY_SIZE)
 left_total = collections.deque([0]*HISTORY_SIZE, maxlen=HISTORY_SIZE)
 right_total = collections.deque([0]*HISTORY_SIZE, maxlen=HISTORY_SIZE)
+
+# 用來同步左右腳最新狀態的變數
+current_L = 0
+current_R = 0
+start_time = None
+x_data = collections.deque([0]*HISTORY_SIZE, maxlen=HISTORY_SIZE) 
 
 def calculate_checksum(data_bytes):
     return sum(data_bytes) & 0xFF
 
 def parse_foot_data(frame):
-    """解析 39 Bytes 的數據幀"""
     if len(frame) != 39 or frame[0] != 0xAA:
         return None
     if calculate_checksum(frame[:38]) != frame[38]:
@@ -31,14 +38,14 @@ def parse_foot_data(frame):
         return None
 
     points = [(frame[2 + i*2] << 8) | frame[3 + i*2] for i in range(18)]
-    
     return {"side": foot_side, "points": points}
 
 def serial_reader():
-    """背景執行緒：負責讀取與解析串口數據"""
+    global current_L, current_R, start_time
+    
     try:
         ser = serial.Serial(COM_PORT, BAUD_RATE, timeout=0.1)
-        print(f"✅ 成功連線至 {COM_PORT}，開始即時繪製總受力圖...")
+        print(f"✅ 成功連線，開始穩定繪製圖表...")
         buffer = bytearray()
 
         while True:
@@ -53,14 +60,22 @@ def serial_reader():
                         result = parse_foot_data(frame)
                         
                         if result:
-                            # 只要計算 18 個點的總和
                             total_f = sum(result["points"])
                             
-                            # 存入對應的佇列中
+                            # 更新最新受力狀態
                             if result["side"] == "左腳":
-                                left_total.append(total_f)
+                                current_L = total_f
                             else:
-                                right_total.append(total_f)
+                                current_R = total_f
+                            
+                            # 紀錄時間
+                            if start_time is None:
+                                start_time = time.monotonic()
+
+                            elapsed_time = time.monotonic() - start_time
+                            x_data.append(elapsed_time)  # 存入的是秒數
+                            left_total.append(current_L)
+                            right_total.append(current_R)
                                 
                         buffer = buffer[start_idx+39:]
                     else:
@@ -71,31 +86,59 @@ def serial_reader():
 
 # ================= 繪圖設定 =================
 fig, ax = plt.subplots(figsize=(10, 6))
-fig.canvas.manager.set_window_title('即時雙腳總壓力監控 (Total Plantar Force)')
+fig.canvas.manager.set_window_title('即時雙腳總壓力監控 (穩定版)')
 
 def animate(frame):
     ax.clear()
     
-    # 將左右腳的總和畫在同一張圖上，方便對比重心轉移
-    ax.plot(list(left_total), label='Left Foot (Total)', color='blue', linewidth=2.5)
-    ax.plot(list(right_total), label='Right Foot (Total)', color='red', linewidth=2.5)
+    # 複製出列表以供繪圖
+    l_x = list(x_data)
+    l_left = list(left_total)
+    l_right = list(right_total)
     
-    ax.set_title('Real-time Plantar Total Force', fontsize=14, fontweight='bold', pad=15)
-    ax.set_ylabel('Force (g)', fontsize=12)
-    ax.set_xlabel('Time (Frames)', fontsize=12)
+    if not l_x:
+        return
+        
+    combined_list = [l + r for l, r in zip(l_left, l_right)]
     
-    # 動態調整 Y 軸上限，並確保最低高度至少為 100
-    max_val = max(max(left_total), max(right_total), 100)
-    ax.set_ylim([0, max_val * 1.1])
+    ax.plot(l_x, l_left, label='Left Foot', color='blue', linewidth=2)
+    ax.plot(l_x, l_right, label='Right Foot', color='red', linewidth=2)
+    ax.plot(l_x, combined_list, label='Combined Force', color='purple', linewidth=3, linestyle='--')
+    
+    ax.set_title('Real-time Plantar Force (Stable View)', fontsize=14, fontweight='bold', pad=15)
+    ax.set_ylabel('Force (Raw Data)', fontsize=12)
+    # 修改 X 軸名稱
+    ax.set_xlabel('Time (s)', fontsize=12)
+    # 讓 X 軸顯示為時間視窗 (例如總是顯示過去 10 秒的數據)
+    current_time = x_data[-1]
+    if current_time > 10:
+        ax.set_xlim([current_time - 10, current_time + 1])
+    else:
+        ax.set_xlim([0, 11])
+    
+    # 1. 鎖死 Y 軸：解決垂直跳動
+    ax.set_ylim([0, Y_MAX])
+    
+    # 2. 攝影機平移 X 軸：讓過去的數據留在原地，畫面平順向右滑動
+    ax.set_xlim([l_x[0], l_x[-1] + 5])
+    
+    left_latest = l_left[-1]
+    right_latest = l_right[-1]
+    ax.text(
+        0.02, 0.98,
+        f'Current L: {left_latest}\nCurrent R: {right_latest}\nCombined: {left_latest + right_latest}',
+        transform=ax.transAxes,
+        va='top', ha='left',
+        fontsize=10,
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8)
+    )
     
     ax.legend(loc='upper right', fontsize=10)
     ax.grid(True, linestyle='--', alpha=0.6)
 
-# 啟動背景執行緒讀取資料
 thread = Thread(target=serial_reader, daemon=True)
 thread.start()
 
-# 啟動動畫 (每 50 毫秒更新一次)
 ani = animation.FuncAnimation(fig, animate, interval=50, cache_frame_data=False)
 
 plt.tight_layout()

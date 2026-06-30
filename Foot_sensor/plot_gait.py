@@ -64,6 +64,11 @@ plt.figure('Plantar Total Force Analysis', figsize=(10, 5))
 plt.plot(left_data["time"], left_data["total_force"], color='blue', linewidth=2, label='Left Foot (Total)')
 plt.plot(right_data["time"], right_data["total_force"], color='red', linewidth=2, label='Right Foot (Total)')
 
+combined_len = min(len(left_data["total_force"]), len(right_data["total_force"]))
+combined_force = [left_data["total_force"][i] + right_data["total_force"][i] for i in range(combined_len)]
+combined_time = left_data["time"][:combined_len]
+plt.plot(combined_time, combined_force, color='green', linewidth=2, label='Combined Force')
+
 plt.title('Plantar Total Force During "Sit-to-Stand & Walk" Test', fontsize=12, fontweight='bold', pad=15)
 plt.xlabel('Time (Seconds s)', fontsize=10, labelpad=8)
 plt.ylabel('Total Weight / Pressure Value (g)', fontsize=10, labelpad=8)
