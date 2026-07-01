@@ -1,11 +1,14 @@
 import serial
 import time
 import collections
+import glob
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 # --- 設定 Serial Port ---
-COM_PORT = '/dev/cu.usbmodem103'  # 記得確認這裡是否和你的板子一致
+# 自動偵測 /dev/ttyACM* (Linux) 或使用預設值
+ports = glob.glob('/dev/ttyACM*')
+COM_PORT = ports[0] if ports else '/dev/ttyACM0'
 BAUD_RATE = 115200
 
 # --- 設定圖表參數 ---
