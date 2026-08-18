@@ -3,7 +3,7 @@ import time
 import json  # 1. 引入 json 模組
 
 # 設定串口參數
-COM_PORT = 'COM8'
+COM_PORT = 'COM9'
 BAUD_RATE = 115200
 
 def calculate_checksum(data_bytes):

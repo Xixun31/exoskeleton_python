@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 from threading import Thread
 
 # ================= 設定區 =================
-COM_PORT = 'COM8'
+COM_PORT = 'COM3'
 BAUD_RATE = 115200
 HISTORY_SIZE = 150  # 稍微拉長顯示範圍，讓波形更好看
 Y_MAX = 75000       # 鎖死 Y 軸天花板，避免畫面垂直跳動
@@ -51,7 +51,12 @@ def serial_reader():
         while True:
             if ser.in_waiting > 0:
                 buffer.extend(ser.read(ser.in_waiting))
-                
+#
+                ## 👇 【關鍵新增】：把藍牙模組囉嗦的提示字串直接刪掉！
+                #noise = b'ATT_HANDLE_VALUE_NOTI\r\n'
+                #if noise in buffer:
+                #    buffer = bytearray(buffer.replace(noise, b''))
+                ## 👆 ==========================================
                 while b'\xaa' in buffer:
                     start_idx = buffer.index(0xAA)
                     
