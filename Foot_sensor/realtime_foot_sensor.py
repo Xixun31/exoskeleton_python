@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 from threading import Thread
 
 # ================= 設定區 =================
-COM_PORT = 'COM3'
+COM_PORT = 'COM6'
 BAUD_RATE = 115200
 HISTORY_SIZE = 150  # 稍微拉長顯示範圍，讓波形更好看
 Y_MAX = 75000       # 鎖死 Y 軸天花板，避免畫面垂直跳動
