@@ -1,0 +1,7 @@
+IMU (pitch) / 外接 Encoder 模型 (IMU 柔性安裝)：H(s) = K * (2*zeta*wn*s + wn^2) / (s^2 + 2*zeta*wn*s + wn^2) * e^(-s*Td)
+  K    (低頻增益)           = 0.953
+  fn   (安裝座/連桿共振頻率) = 13.30 Hz  (wn = 83.6 rad/s)
+  zeta (阻尼比)             = 0.554
+  Td   (純時間延遲)         = 0.33 ms
+  擬合誤差 (相對 RMS)       = 1.2 %
+  ⚠️ fn 高於最高量測頻率 10 Hz，是外插估計，fn 與 zeta 的不確定性較大
