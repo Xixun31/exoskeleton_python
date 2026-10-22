@@ -4,10 +4,16 @@ import serial
 import time
 import numpy as np
 import threading
+from scipy.signal import butter, sosfilt, sosfilt_zi
 
 # ================= 配置區 =================
-COM_PORT = "COM6"      # 確保是你的官方藍牙接收器 Port
+COM_PORT = "COM8"      # 確保是你的官方藍牙接收器 Port
 BAUD_RATE = 115200
+
+# 6 Hz 二階 Butterworth 低通濾波設定
+FILTER_CUTOFF_HZ = 6.0
+FOOT_SAMPLE_RATE_HZ = 50.0  # 左腳、右腳各自約 50 Hz
+CAPTURE_SECONDS = 3         # 姿勢穩定後，連續採集 3 秒
 # ==========================================
 
 class DataCollectorGUI:
@@ -23,6 +29,17 @@ class DataCollectorGUI:
         self.is_collecting = False
         self.collected_left = []
         self.collected_right = []
+
+        # 每隻腳的 18 個感測點各自使用同一組 6 Hz 低通濾波器。
+        # 濾波器狀態在連續串流中保留，不會每次按下採集就重設。
+        self.filter_sos = butter(
+            2,
+            FILTER_CUTOFF_HZ,
+            btype="lowpass",
+            fs=FOOT_SAMPLE_RATE_HZ,
+            output="sos"
+        )
+        self.filter_zi = {"L": [None] * 18, "R": [None] * 18}
 
         self.setup_gui()
         self.connect_serial()
@@ -45,7 +62,11 @@ class DataCollectorGUI:
         self.lbl_countdown.pack(pady=5)
 
         # 採集按鈕
-        self.btn_collect = ttk.Button(self.root, text="開始採集 (倒數3秒)", command=self.start_collection)
+        self.btn_collect = ttk.Button(
+            self.root,
+            text="開始採集（倒數 3 秒＋記錄 3 秒平均）",
+            command=self.start_collection
+        )
         self.btn_collect.pack(pady=5, ipadx=20, ipady=10)
 
         ttk.Label(self.root, text="採集結果 (Tab分隔，請全選複製並直接貼上 Excel):").pack(anchor="w", padx=20)
@@ -93,6 +114,27 @@ class DataCollectorGUI:
         points = [(frame[2 + i*2] << 8) | frame[3 + i*2] for i in range(18)]
         return {"side": foot_side, "points": points}
 
+    def filter_foot_points(self, side, points):
+        """對單腳 18 個感測點逐點套用連續式 6 Hz 低通濾波。"""
+        filtered_points = []
+
+        for i, raw_value in enumerate(points):
+            zi = self.filter_zi[side][i]
+
+            # 第一次收到該感測點資料時，以目前讀值初始化，減少起始突波。
+            if zi is None:
+                zi = sosfilt_zi(self.filter_sos) * float(raw_value)
+
+            filtered, zi = sosfilt(
+                self.filter_sos,
+                [float(raw_value)],
+                zi=zi
+            )
+            self.filter_zi[side][i] = zi
+            filtered_points.append(float(filtered[0]))
+
+        return filtered_points
+
     def connect_serial(self):
         try:
             self.ser = serial.Serial(COM_PORT, BAUD_RATE, timeout=0.1)
@@ -118,11 +160,18 @@ class DataCollectorGUI:
                             frame = buffer[start_idx : start_idx+39]
                             result = self.parse_foot_data(frame)
                             
-                            if result and self.is_collecting:
-                                if result["side"] == "L":
-                                    self.collected_left.append(result["points"])
-                                elif result["side"] == "R":
-                                    self.collected_right.append(result["points"])
+                            if result:
+                                side = result["side"]
+                                # 無論目前是否在採集，都持續更新濾波器狀態。
+                                filtered_points = self.filter_foot_points(
+                                    side, result["points"]
+                                )
+
+                                if self.is_collecting:
+                                    if side == "L":
+                                        self.collected_left.append(filtered_points)
+                                    elif side == "R":
+                                        self.collected_right.append(filtered_points)
                                     
                             buffer = buffer[start_idx+39:]
                         else:
@@ -157,8 +206,8 @@ class DataCollectorGUI:
             self.collected_right = []
             self.is_collecting = True
             
-            # 收集 1 秒鐘的資料
-            self.root.after(1000, self.finish_capture)
+            # 收集連續 3 秒的濾波後資料，再計算各感測點平均值
+            self.root.after(CAPTURE_SECONDS * 1000, self.finish_capture)
 
     def finish_capture(self):
         self.is_collecting = False
@@ -171,7 +220,7 @@ class DataCollectorGUI:
         # 取得使用者輸入的真實重量
         true_weight = self.entry_weight.get().strip()
             
-        # 計算平均值
+        # 計算 3 秒採集區間內，濾波後各感測點的平均值
         avg_left = np.mean(self.collected_left, axis=0)
         avg_right = np.mean(self.collected_right, axis=0)
         
