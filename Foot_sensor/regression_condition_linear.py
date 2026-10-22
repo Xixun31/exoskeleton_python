@@ -1,7 +1,8 @@
 """
-普通線性迴歸（OLS）診斷版：依 condition 訓練 left / right / both。
+普通線性迴歸（OLS）訓練版：只依 condition 訓練 left / right。
 每次執行建立獨立資料夾，不覆蓋前次結果；輸出訓練預測、LOOCV 預測、
 三種診斷圖、各 posture 的交叉驗證誤差統計、係數表及模型檔。
+注意：這是訓練程式，不是用獨立新受測者資料做驗證的 validate_new_subject.py。
 """
 from pathlib import Path
 from datetime import datetime
@@ -17,14 +18,13 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import LeaveOneOut, cross_val_predict
 
 INPUT_FILE = "foot_data.xlsx"
-OUTPUT_BASE_DIR = "regression_output_linear"
+OUTPUT_BASE_DIR = "regression_output_linear_training"
 READ_HEADER_ROW = 1  # Excel 第 1 列是說明文字，第 2 列是欄位名稱
 
 SENSOR_COLS = [f"L{i}" for i in range(1, 19)] + [f"R{i}" for i in range(1, 19)]
 CONDITIONS = {
     "left": [f"L{i}" for i in range(1, 19)],
     "right": [f"R{i}" for i in range(1, 19)],
-    "both": SENSOR_COLS,
 }
 
 def rmse(y_true, y_pred):
@@ -54,10 +54,10 @@ def main():
     root = Path(OUTPUT_BASE_DIR)
     root.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = root / f"run_{stamp}"
+    out_dir = root / f"training_run_{stamp}"
     suffix = 1
     while out_dir.exists():
-        out_dir = root / f"run_{stamp}_{suffix}"
+        out_dir = root / f"training_run_{stamp}_{suffix}"
         suffix += 1
     out_dir.mkdir(parents=True)
 
@@ -180,7 +180,7 @@ def main():
         pd.DataFrame(posture_summaries).to_excel(out_dir / "posture_cv_error_summary.xlsx", index=False)
 
     print(f"\n本次結果資料夾：{out_dir.resolve()}")
-    print("每次執行都會建立新的 run_時間戳資料夾，不會覆蓋前次結果。")
+    print("這是【訓練版】結果；每次執行都會建立新的 training_run_時間戳資料夾，不會覆蓋前次結果。")
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,7 @@ import threading
 from scipy.signal import butter, sosfilt, sosfilt_zi
 
 # ================= 配置區 =================
-COM_PORT = "COM8"      # 確保是你的官方藍牙接收器 Port
+COM_PORT = "COM6"      # 確保是你的官方藍牙接收器 Port
 BAUD_RATE = 115200
 
 # 6 Hz 二階 Butterworth 低通濾波設定
@@ -19,7 +19,7 @@ CAPTURE_SECONDS = 3         # 姿勢穩定後，連續採集 3 秒
 class DataCollectorGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("足底感測器 迴歸分析數據採集工具 (完美 Excel 版)")
+        self.root.title("足底感測器數據採集工具（6 Hz 低通濾波）")
         self.root.geometry("800x450") # 加寬視窗
 
         self.ser = None
@@ -49,14 +49,6 @@ class DataCollectorGUI:
         self.lbl_status = ttk.Label(self.root, text="狀態: 未連線", font=("Arial", 14))
         self.lbl_status.pack(pady=5)
 
-        # 真實重量輸入區
-        weight_frame = ttk.Frame(self.root)
-        weight_frame.pack(pady=5)
-        ttk.Label(weight_frame, text="請輸入目前踩踏的真實重量 (kg): ", font=("Arial", 12, "bold")).pack(side=tk.LEFT)
-        self.entry_weight = ttk.Entry(weight_frame, width=10, font=("Arial", 12))
-        self.entry_weight.pack(side=tk.LEFT)
-        self.entry_weight.insert(0, "0") # 預設值
-
         # 倒數計時顯示
         self.lbl_countdown = ttk.Label(self.root, text="", font=("Arial", 18, "bold"), foreground="red")
         self.lbl_countdown.pack(pady=5)
@@ -80,16 +72,24 @@ class DataCollectorGUI:
         y_scroll = ttk.Scrollbar(text_frame, orient=tk.VERTICAL)
         y_scroll.pack(side=tk.RIGHT, fill=tk.Y)
         
-        self.txt_result = tk.Text(text_frame, wrap=tk.NONE, xscrollcommand=x_scroll.set, yscrollcommand=y_scroll.set)
+        self.txt_result = tk.Text(
+            text_frame,
+            wrap=tk.NONE,
+            xscrollcommand=x_scroll.set,
+            yscrollcommand=y_scroll.set,
+            state=tk.DISABLED  # 使用者不能直接修改或刪除標題與紀錄
+        )
         self.txt_result.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         x_scroll.config(command=self.txt_result.xview)
         y_scroll.config(command=self.txt_result.yview)
         
-        # 動態生成表頭 (Weight, L1~L18, R1~R18)
-        cols = ["TrueWeight"] + [f"L{i}" for i in range(1, 19)] + [f"R{i}" for i in range(1, 19)]
+        # 固定表頭 (L1~L18, R1~R18)，並鎖定文字框避免手動刪改
+        cols = [f"L{i}" for i in range(1, 19)] + [f"R{i}" for i in range(1, 19)]
         header = "\t".join(cols) + "\n"
+        self.txt_result.config(state=tk.NORMAL)
         self.txt_result.insert(tk.END, header)
+        self.txt_result.config(state=tk.DISABLED)
 
     def calculate_checksum(self, data_bytes):
         return sum(data_bytes) & 0xFF
@@ -186,11 +186,6 @@ class DataCollectorGUI:
             messagebox.showwarning("警告", "請先確認藍牙已連線！")
             return
             
-        weight_input = self.entry_weight.get().strip()
-        if not weight_input:
-            messagebox.showwarning("警告", "請先輸入當前的真實重量！")
-            return
-            
         self.btn_collect.config(state="disabled")
         self.countdown(3)
 
@@ -217,9 +212,6 @@ class DataCollectorGUI:
             self.btn_collect.config(state="normal")
             return
             
-        # 取得使用者輸入的真實重量
-        true_weight = self.entry_weight.get().strip()
-            
         # 計算 3 秒採集區間內，濾波後各感測點的平均值
         avg_left = np.mean(self.collected_left, axis=0)
         avg_right = np.mean(self.collected_right, axis=0)
@@ -228,11 +220,14 @@ class DataCollectorGUI:
         left_str = "\t".join([f"{val:.1f}" for val in avg_left])
         right_str = "\t".join([f"{val:.1f}" for val in avg_right])
         
-        # 組合輸出列: TrueWeight \t L1~L18 \t R1~R18
-        output_row = f"{true_weight}\t{left_str}\t{right_str}\n"
+        # 只輸出感測器數據：L1~L18、R1~R18，不包含 TrueWeight
+        output_row = f"{left_str}\t{right_str}\n"
         
+        # 暫時開啟文字框供程式追加資料，完成後重新鎖定
+        self.txt_result.config(state=tk.NORMAL)
         self.txt_result.insert(tk.END, output_row)
         self.txt_result.see(tk.END)
+        self.txt_result.config(state=tk.DISABLED)
         
         self.lbl_countdown.config(text="擷取完成！", foreground="green")
         self.btn_collect.config(state="normal")
