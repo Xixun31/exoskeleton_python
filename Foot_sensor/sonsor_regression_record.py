@@ -53,13 +53,23 @@ class DataCollectorGUI:
         self.lbl_countdown = ttk.Label(self.root, text="", font=("Arial", 18, "bold"), foreground="red")
         self.lbl_countdown.pack(pady=5)
 
-        # 採集按鈕
+        # 操作按鈕：開始採集、清除目前畫面上的採集結果
+        button_frame = ttk.Frame(self.root)
+        button_frame.pack(pady=5)
+
         self.btn_collect = ttk.Button(
-            self.root,
+            button_frame,
             text="開始採集（倒數 3 秒＋記錄 3 秒平均）",
             command=self.start_collection
         )
-        self.btn_collect.pack(pady=5, ipadx=20, ipady=10)
+        self.btn_collect.pack(side=tk.LEFT, padx=5, ipadx=20, ipady=10)
+
+        self.btn_clear = ttk.Button(
+            button_frame,
+            text="清除採集結果",
+            command=self.clear_results
+        )
+        self.btn_clear.pack(side=tk.LEFT, padx=5, ipadx=10, ipady=10)
 
         ttk.Label(self.root, text="採集結果 (Tab分隔，請全選複製並直接貼上 Excel):").pack(anchor="w", padx=20)
 
@@ -180,6 +190,23 @@ class DataCollectorGUI:
                 except Exception as e:
                     pass
             time.sleep(0.01)
+
+    def clear_results(self):
+        """清除畫面上已完成的採集列，保留 L1~L18、R1~R18 表頭。"""
+        if not messagebox.askyesno("確認清除", "確定要清除目前畫面上的所有採集結果嗎？"):
+            return
+
+        self.txt_result.config(state=tk.NORMAL)
+        self.txt_result.delete("1.0", tk.END)
+
+        cols = [f"L{i}" for i in range(1, 19)] + [f"R{i}" for i in range(1, 19)]
+        self.txt_result.insert(tk.END, "\t".join(cols) + "\n")
+        self.txt_result.config(state=tk.DISABLED)
+
+        # 同時清空暫存的採集資料；不重設連續低通濾波器狀態。
+        self.collected_left = []
+        self.collected_right = []
+        self.lbl_countdown.config(text="採集結果已清除", foreground="black")
 
     def start_collection(self):
         if not self.is_connected:

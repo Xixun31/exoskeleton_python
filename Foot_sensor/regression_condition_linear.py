@@ -3,6 +3,17 @@
 每次執行建立獨立資料夾，不覆蓋前次結果；輸出訓練預測、LOOCV 預測、
 三種診斷圖、各 posture 的交叉驗證誤差統計、係數表及模型檔。
 注意：這是訓練程式，不是用獨立新受測者資料做驗證的 validate_new_subject.py。
+
+=== 這版多做的事（方案B的延伸：連續的姿態相關特徵） ===
+除了原本的18個原始感測點讀值，額外加入從同一組讀值算出來的連續特徵
+（COP_x, COP_y, active_count, std, front_back_ratio, medial_lateral_ratio），
+取代原本討論中「每個姿態一個 one-hot 類別」的作法，理由是：
+  1. 這些特徵是單腳自己18點就能算出來的，不需要知道「現在是哪個姿態」這個
+     標籤，未來系統實際運作時（不知道使用者當下姿態）也一樣能算。
+  2. 對沒在訓練集出現過的新姿態也能合理外推，不會像 one-hot 遇到新類別
+     完全沒輒。
+特徵計算邏輯全部寫在 features.py，這支腳本跟未來的驗證腳本都共用同一份，
+避免訓練/推論兩邊特徵算法兜不起來。
 """
 from pathlib import Path
 from datetime import datetime
@@ -17,6 +28,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import LeaveOneOut, cross_val_predict
 
+import features as feat  # 共用特徵模組，跟驗證腳本要 import 同一份
+
 INPUT_FILE = "foot_data.xlsx"
 OUTPUT_BASE_DIR = "regression_output_linear_training"
 READ_HEADER_ROW = 1  # Excel 第 1 列是說明文字，第 2 列是欄位名稱
@@ -26,6 +39,44 @@ CONDITIONS = {
     "left": [f"L{i}" for i in range(1, 19)],
     "right": [f"R{i}" for i in range(1, 19)],
 }
+
+# ==============================
+# 感測器負值處理
+# ==============================
+
+SENSOR_COLUMNS = (
+    [f"L{i}" for i in range(1, 19)]
+    + [f"R{i}" for i in range(1, 19)]
+)
+
+DEADBAND = 2.0
+CLIP_ALL_NEGATIVE = False
+
+
+def clean_sensor_data(df):
+    df = df.copy()
+
+    columns = [col for col in SENSOR_COLUMNS if col in df.columns]
+
+    df[columns] = df[columns].apply(
+        pd.to_numeric, errors="coerce"
+    )
+
+    if CLIP_ALL_NEGATIVE:
+        # 所有負值都歸零
+        df[columns] = df[columns].clip(lower=0)
+    else:
+        # 只將絕對值小於 2 的數值歸零
+        df[columns] = df[columns].mask(
+            df[columns].abs() < DEADBAND, 0
+        )
+
+    return df
+
+
+# ==============================
+# 以下接原本的程式
+# ==============================
 
 def rmse(y_true, y_pred):
     return float(np.sqrt(mean_squared_error(y_true, y_pred)))
@@ -37,6 +88,7 @@ def main():
             f"找不到資料檔：{input_path.resolve()}，請修改 INPUT_FILE。"
         )
     df = pd.read_excel(input_path, header=READ_HEADER_ROW)
+    df = clean_sensor_data(df)
     df.columns = [str(c).strip() for c in df.columns]
     missing = {"condition", "reference_force_N"} - set(df.columns)
     if missing:
@@ -63,22 +115,38 @@ def main():
 
     summaries, predictions, coefficients, posture_summaries = [], [], [], []
 
-    for condition, features in CONDITIONS.items():
+    for condition, raw_features in CONDITIONS.items():
         cdf = df[df["condition"] == condition].copy()
         if cdf.empty:
             warnings.warn(f"condition='{condition}' 沒有資料，略過。")
             continue
-        missing_features = [c for c in features if c not in cdf.columns]
+        missing_features = [c for c in raw_features if c not in cdf.columns]
         if missing_features:
             warnings.warn(f"{condition} 缺少欄位 {missing_features}，略過。")
             continue
 
-        valid = cdf[features + ["reference_force_N"]].notna().all(axis=1)
+        valid = cdf[raw_features + ["reference_force_N"]].notna().all(axis=1)
         data = cdf.loc[valid].copy()
         dropped = len(cdf) - len(data)
         if len(data) < 2:
             warnings.warn(f"{condition} 有效資料不足 2 筆，略過。")
             continue
+
+        # ---- 新增：算連續的姿態相關特徵，併到原始18點後面 ----
+        engineered = feat.build_engineered_frame(data, raw_features, condition)
+        n_before = len(data)
+        data = pd.concat([data, engineered], axis=1)
+        # COP 等特徵在「這隻腳完全沒受力」時會是 nan（理論上不太該發生在這組
+        # condition 篩選過的資料裡，但保險起見還是濾掉，並印出來讓你知道）
+        data = data.dropna(subset=feat.ENGINEERED_FEATURE_NAMES)
+        n_dropped_by_feat = n_before - len(data)
+        if n_dropped_by_feat:
+            warnings.warn(
+                f"{condition} 有 {n_dropped_by_feat} 筆資料在算姿態特徵時出現 nan"
+                "（通常代表18點讀值全部<=0），已從訓練集排除，請檢查這幾筆原始資料。"
+            )
+
+        features = raw_features + feat.ENGINEERED_FEATURE_NAMES
 
         X = data[features].astype(float)
         y = data["reference_force_N"].astype(float)
@@ -98,9 +166,9 @@ def main():
                 warnings.warn(f"{condition} LOOCV 失敗：{exc}")
 
         summaries.append({
-            "condition": condition, "model": "LinearRegression (OLS)",
+            "condition": condition, "model": "LinearRegression (OLS) + engineered features",
             "n_rows_in_condition": len(cdf), "n_valid_rows": len(data),
-            "n_dropped_rows": dropped, "n_features": len(features),
+            "n_dropped_rows": dropped + n_dropped_by_feat, "n_features": len(features),
             "train_MAE_N": mean_absolute_error(y, train_pred),
             "train_RMSE_N": rmse(y, train_pred), "train_R2": r2_score(y, train_pred),
             "LOOCV_MAE_N": cv_mae, "LOOCV_RMSE_N": cv_rmse, "LOOCV_R2": cv_r2,
@@ -119,7 +187,22 @@ def main():
         coef.loc[len(coef)] = ["intercept", model.intercept_]
         coef["condition_model"] = condition
         coefficients.append(coef)
-        joblib.dump(model, out_dir / f"{condition}_linear_model.joblib")
+
+        # ---- 模型檔打包成 dict，連同算特徵需要的資訊一起存，不要只存裸模型 ----
+        # 驗證腳本/未來的推論程式載入時，要用同一個 features.py 重新算一次
+        # engineered 特徵，再把 raw_features + engineered 依這裡存的順序組成
+        # X 丟進 model.predict()。
+        bundle = {
+            "model": model,
+            "condition": condition,
+            "raw_feature_names": raw_features,
+            "engineered_feature_names": feat.ENGINEERED_FEATURE_NAMES,
+            "all_feature_names": features,  # X 欄位順序，predict 前要照這個順序排
+            "deadband": DEADBAND,
+            "clip_all_negative": CLIP_ALL_NEGATIVE,
+            "trained_at": stamp,
+        }
+        joblib.dump(bundle, out_dir / f"{condition}_linear_model.joblib")
 
         if len(data) >= 5 and np.isfinite(cv_pred).all():
             residual = cv_pred - y.to_numpy()
@@ -167,7 +250,8 @@ def main():
                             "CV_mean_error_N": float(errors.mean()),
                         })
 
-        print(f"[{condition}] n={len(data)}; train R2={r2_score(y, train_pred):.4f}; "
+        print(f"[{condition}] n={len(data)}; features={len(features)}; "
+              f"train R2={r2_score(y, train_pred):.4f}; "
               f"LOOCV MAE={cv_mae:.3f} N; LOOCV RMSE={cv_rmse:.3f} N; LOOCV R2={cv_r2:.4f}")
 
     if not summaries:
