@@ -20,6 +20,7 @@
 - [pitch_calibration_helper.py](file:///home/xixun/project/python/imu/pitch_calibration_helper.py)：互動式 Pitch 靜態角度多點校正工具，自動扣除安裝偏置，生成校正 CSV 並繪製誤差分布圖。
 - [record_dynamic_pitch.py](file:///home/xixun/project/python/imu/record_dynamic_pitch.py)：連續記錄來回擺動時的 Pitch 數據，並繪製兩顆 IMU 動態角度與同步差值曲線。
 - [render_captured_data.py](file:///home/xixun/project/python/imu/render_captured_data.py)：用以從中斷緩衝區中手動重建校正報告與繪圖的備用工具。
+- [live_plot_enc_imu.py](file:///home/xixun/project/python/imu/live_plot_enc_imu.py)：搭配 `mbed/enc_imu_sd_logger`，即時顯示兩顆 encoder 角度與 IMU 姿態角、角速度、加速度，確認感測器是否正常。
 
 ### 📂 [bluetooth/](file:///home/xixun/project/python/bluetooth/) - 藍牙與 BLE 通訊工具
 - [Bluetooth.py](file:///home/xixun/project/python/bluetooth/Bluetooth.py)：藍牙裝置掃描與連線管理。
