@@ -1,17 +1,22 @@
 """
 新受試者獨立驗證程式
 用途：
-1. 載入已訓練好的 left_linear_model.joblib / right_linear_model.joblib
-   （新版訓練腳本存的是 dict：model + 特徵欄位資訊，不是裸模型）
+1. 載入已訓練好的模型檔（新版訓練腳本每個 condition 會輸出 A/B/C 三種變體，
+   各自獨立存檔，見下方 MODEL_FILES 設定要挑哪一個）
 2. 使用 new_data.xlsx 預測新受試者，不重新訓練
 3. 計算 MAE、RMSE、R²、MAPE、平均偏差與逐筆百分比誤差
 4. 輸出 Excel 報告
 5. 輸出左右腳各自的「實際 vs 預測」散佈圖（PNG）
 
-請將本程式、features.py、new_data.xlsx、left_linear_model.joblib、
-right_linear_model.joblib 放在同一個資料夾。
+請將本程式、features.py、new_data.xlsx、以及 MODEL_FILES 指定的兩個模型檔
+放在同一個資料夾。
 （features.py 是訓練/驗證共用的特徵計算邏輯，一定要跟訓練時用的是同一份，
 不要自己重寫一份，否則特徵算法兩邊兜不起來，預測會不準。）
+
+左右腳可以各自選不同變體（例如左腳用18點版、右腳用加總版），不用兩邊一致——
+不管載入哪個變體的模型檔，這支程式都會自動算出「18點+Total+6個工程特徵」
+這個完整候選欄位集合，再依照模型檔自己存的 all_feature_names 去挑對應子集，
+不需要另外改程式邏輯去配合變體。
 """
 
 from pathlib import Path
@@ -28,8 +33,11 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import features as feat  # 共用特徵模組，必須跟訓練腳本用同一份
 
 DATA_FILE = "new_data.xlsx"
-LEFT_MODEL_FILE = "left_linear_model.joblib"
-RIGHT_MODEL_FILE = "right_linear_model.joblib"
+# 挑選每隻腳要用哪個變體的模型檔——左右腳可以不一樣（例如下面這組是
+# 左腳用18點獨立權重版、右腳用加總+工程特徵版，依訓練腳本輸出的比較結果調整）。
+# 檔名要跟 regression_condition_linear.py 實際輸出的檔名完全一致。
+LEFT_MODEL_FILE = "left_C_total_engineered_linear_model.joblib"
+RIGHT_MODEL_FILE = "right_C_total_engineered_linear_model.joblib"
 OUTPUT_FILE = "new_subject_validation_results.xlsx"
 OUTPUT_ROOT = "validation_output"  # 驗證結果總資料夾；每次執行會建立獨立子資料夾
 
@@ -51,8 +59,13 @@ SENSOR_COLUMNS = (
     + [f"R{i}" for i in range(1, 19)]
 )
 
-DEADBAND = 2.0
+# 原始感測器輸出單位為 g：先在校正前套用 2 g deadband。
+DEADBAND_G = 2.0
 CLIP_ALL_NEGATIVE = False
+
+# 每個感測點各自套用的砝碼校正公式：F(N) = A * x(g) + B。
+CALIBRATION_A = 0.0073213668
+CALIBRATION_B = 6.393078
 
 
 def clean_sensor_data(df):
@@ -68,10 +81,24 @@ def clean_sensor_data(df):
         # 所有負值都歸零
         df[columns] = df[columns].clip(lower=0)
     else:
-        # 只將絕對值小於 2 的數值歸零
+        # 原始資料單位是 g，因此 2 g deadband 必須在砝碼校正前執行。
         df[columns] = df[columns].mask(
-            df[columns].abs() < DEADBAND, 0
+            df[columns].abs() < DEADBAND_G, 0
         )
+
+    return df
+
+
+def calibrate_sensor_data(df):
+    """將原始 g 讀值逐點轉成 N；原始值為 0 的點仍維持 0。"""
+    df = df.copy()
+    columns = [col for col in SENSOR_COLUMNS if col in df.columns]
+
+    for col in columns:
+        raw = pd.to_numeric(df[col], errors="coerce")
+        calibrated = CALIBRATION_A * raw + CALIBRATION_B
+        # 不讓截距把原始零點變成 6.393078 N。
+        df[col] = calibrated.where(raw != 0, 0)
 
     return df
 
@@ -101,7 +128,11 @@ def plot_actual_vs_predicted(y, pred, condition, out_dir, posture=None):
     ax.grid(True, alpha=0.25)
     fig.tight_layout()
 
-    fname = f"{condition}_actual_vs_predicted"
+    safe_condition = (
+        str(condition).replace("/", "_").replace("\\", "_")
+        .replace("(", "").replace(")", "").replace(" ", "_").replace("+", "_")
+    )
+    fname = f"{safe_condition}_actual_vs_predicted"
     if posture is not None:
         safe_posture = str(posture).replace("/", "_").replace("\\", "_")
         fname += f"_{safe_posture}"
@@ -129,8 +160,12 @@ def main():
         )
 
     df = pd.read_excel(data_path, header=0)
-    df = clean_sensor_data(df)
     df.columns = [str(c).strip() for c in df.columns]
+
+    # 1) 原始 g 資料先做 2 g deadband
+    df = clean_sensor_data(df)
+    # 2) 每個感測點分別做砝碼校正，輸入尺度轉成 N
+    df = calibrate_sensor_data(df)
 
     required = {"condition", "reference_force_N"}
     missing = required - set(df.columns)
@@ -167,6 +202,7 @@ def main():
             )
 
         model = bundle["model"]
+        variant = bundle.get("variant", "unknown")
         raw_cols = bundle["raw_feature_names"]
         engineered_cols = bundle["engineered_feature_names"]
         all_cols = bundle["all_feature_names"]
@@ -193,10 +229,14 @@ def main():
             warnings.warn(f"{condition} 沒有完整有效資料，略過。")
             continue
 
-        # ---- 用跟訓練時同一份 features.py，算出同一組連續特徵 ----
+        # ---- 不管這個模型是哪個變體，都先算出完整的候選特徵集合：
+        # 18個原始點（本來就在subset裡）+ Total(加總) + 6個工程特徵，
+        # 再用 all_cols（模型檔自己存的、訓練時實際用的欄位）去挑子集。
+        # 這樣驗證腳本不用知道現在載入的是A/B/C哪一個，自動對得上。----
         engineered = feat.build_engineered_frame(subset, raw_cols, condition)
         n_before = len(subset)
         subset = pd.concat([subset, engineered], axis=1)
+        subset["Total"] = subset[raw_cols].sum(axis=1)
         subset = subset.dropna(subset=engineered_cols)
         n_dropped_by_feat = n_before - len(subset)
         if n_dropped_by_feat:
@@ -217,7 +257,7 @@ def main():
             pred = np.asarray(model.predict(X), dtype=float)
 
         # ---- 畫這個 condition 整體的「參考值 vs 預測值」散佈圖 ----
-        plot_actual_vs_predicted(y, pred, condition, run_dir)
+        plot_actual_vs_predicted(y, pred, f"{condition} ({variant})", run_dir)
 
         error = pred - y
         abs_error = np.abs(error)
@@ -227,7 +267,7 @@ def main():
         signed_pct_error = np.full(len(y), np.nan, dtype=float)
         signed_pct_error[nonzero] = error[nonzero] / np.abs(y[nonzero]) * 100
 
-        subset["model_used"] = f"{condition}_linear_model"
+        subset["model_used"] = f"{condition}_{variant}"
         subset["predicted_force_N"] = pred
         subset["error_N_pred_minus_reference"] = error
         subset["absolute_error_N"] = abs_error
@@ -241,6 +281,7 @@ def main():
 
         summaries.append({
             "condition": condition,
+            "variant": variant,
             "n_valid": len(y),
             "n_rows_dropped_missing": dropped + n_dropped_by_feat,
             "MAE_N": mean_absolute_error(y, pred),
@@ -268,6 +309,7 @@ def main():
                 e = group["error_N_pred_minus_reference"].to_numpy()
                 posture_summaries.append({
                     "condition": condition,
+                    "variant": variant,
                     "posture": str(posture),
                     "n_samples": len(group),
                     "MAE_N": float(np.mean(np.abs(e))),

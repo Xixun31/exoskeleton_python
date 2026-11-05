@@ -31,15 +31,25 @@ SENSOR_Y = [
 ]
 
 # 之後決定腳跟原點後，跟韌體一起改這裡
+# 座標定義（2026-10-28 確認）：原點=腳跟，y恆正（往腳尖方向遞增）；
+# x 以外側為正、內側為負。
 ORIGIN_X = 1984.7721
 ORIGIN_Y = 2415.3761
+
+# 前後分界點：原點是腳跟（y軸的一個端點，不是中點），不能拿 ORIGIN_Y 當
+# 前後分界——所有感測點的 y 都會大於 ORIGIN_Y，拿它當分界線永遠切不出
+# 「前」的那一半（這正是之前 front_back_ratio 恆為 0 的原因）。
+# 改用18個感測點 y 座標的中位數當分界點，確保前後兩邊都切得到點。
+FRONT_BACK_SPLIT_Y = float(np.median(SENSOR_Y))
 
 # 跟韌體邏輯一致：如果 sensor_x/y 是右腳 CAD、而左腳想鏡射共用同一組身體座標系，
 # 改成 True；左右腳各自有自己局部座標系的話維持 False。
 MIRROR_LEFT_X = False
 
-# 判斷「這個感測點有沒有受力」的門檻（g），跟韌體 FORCE_THRESHOLD 一致
-FORCE_THRESHOLD = 50.0
+# 訓練/驗證輸入的感測點已經是砝碼校正後的 N，
+# 原始韌體門檻 50 g（按 1 gf = 0.00980665 N 換算）需先轉成 N。
+# 50 g 原始讀值經校正式：0.0073213668 * 50 + 6.393078 = 6.75914634 N。
+FORCE_THRESHOLD = 6.75914634
 
 N_POINTS = 18
 
@@ -82,10 +92,21 @@ def extract_posture_features(values, condition: str) -> dict:
     從單腳18點原始讀值，算出一組「跟姿態相關、但不需要姿態標籤」的連續特徵。
     回傳 dict 的 key 就是要併入回歸特徵矩陣的欄位名稱（見 ENGINEERED_FEATURE_NAMES）。
 
-    注意：front_back_ratio / medial_lateral_ratio 的分界方向（哪邊算前腳掌、
-    哪邊算內側）是先用 origin_x / origin_y 當分界線猜的，CAD座標的方向我沒有
-    實際核對過——如果你套進資料後發現這兩個比例跟直覺的前後/內外側相反，
-    把對應那行的不等號方向(`<` 改 `>`)反過來就好，不影響其他特徵。
+    front_back_ratio / medial_lateral_ratio 改用「平衡指數」(A-B)/(A+B)，
+    而不是直接相除 A/B：
+      - 原本直接相除在某一側總和趨近0時會算出離譜大的數字（除以接近0的分母），
+        對OLS係數的影響不成比例，是不穩定的來源。
+      - 平衡指數天生落在 [-1, 1]，0代表兩側均衡，+1代表完全偏某一側，
+        -1代表完全偏另一側，數值穩定、物理意義一樣清楚。
+
+    方向定義（2026-10-28 確認，跟目前韌體座標一致）：
+      - front_back_ratio：正值 = 偏前腳掌，負值 = 偏腳跟。
+        分界點用 FRONT_BACK_SPLIT_Y（18點y座標的中位數），不能用 ORIGIN_Y——
+        原點是腳跟本身（y軸端點，不是中點），拿它當分界線會讓「前」那一半
+        永遠切不到任何點（這正是先前 front_back_ratio 恆為0的原因）。
+      - medial_lateral_ratio：正值 = 偏外側，負值 = 偏內側，跟 x 座標
+        「外側正、內側負」的定義一致，分界點用 ORIGIN_X（腳跟x座標，落在
+        18點分佈中間，可以正常切出兩側）。
     """
     v = np.asarray(values, dtype=float)
     v_pos = np.clip(v, 0, None)
@@ -96,18 +117,18 @@ def extract_posture_features(values, condition: str) -> dict:
     std = float(v_pos.std())
 
     y = np.array(SENSOR_Y, dtype=float)
-    front_mask = y < ORIGIN_Y
+    front_mask = y < FRONT_BACK_SPLIT_Y
     back_mask = ~front_mask
     front_sum = float(v_pos[front_mask].sum())
     back_sum = float(v_pos[back_mask].sum())
-    front_back_ratio = front_sum / (back_sum + 1e-6)
+    front_back_ratio = (front_sum - back_sum) / (front_sum + back_sum + 1e-6)
 
     x = _effective_x(condition)
-    medial_mask = x < ORIGIN_X
-    lateral_mask = ~medial_mask
+    medial_mask = x < ORIGIN_X   # x < 原點 → 內側（負）
+    lateral_mask = ~medial_mask  # x >= 原點 → 外側（正）
     medial_sum = float(v_pos[medial_mask].sum())
     lateral_sum = float(v_pos[lateral_mask].sum())
-    medial_lateral_ratio = medial_sum / (lateral_sum + 1e-6)
+    medial_lateral_ratio = (lateral_sum - medial_sum) / (lateral_sum + medial_sum + 1e-6)
 
     return {
         "cop_x": cop_x,

@@ -7,7 +7,7 @@ import threading
 from scipy.signal import butter, sosfilt, sosfilt_zi
 
 # ================= 配置區 =================
-COM_PORT = "COM6"      # 確保是你的官方藍牙接收器 Port
+COM_PORT = "COM8"      # 確保是你的官方藍牙接收器 Port
 BAUD_RATE = 115200
 
 # 6 Hz 二階 Butterworth 低通濾波設定
